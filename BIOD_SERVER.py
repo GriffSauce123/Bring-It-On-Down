@@ -27,13 +27,6 @@ class Server(object):
 				self.message, self.addr = self.server.recvfrom(1024)
 				self.data = self.message.decode()
 
-				self.other = []
-				if len(self.clients) == 2:
-					for x in self.clients:
-						self.other.append(x)
-					self.other.remove(self.addr)
-					self.other = self.other[0]
-				
 				if self.data == 'disconnect':
 					total_clients.remove(self.addr)
 					self.clients.remove(self.addr)
@@ -43,8 +36,17 @@ class Server(object):
 					elif len(self.clients) == 1:
 						counter -= 1
 					servers.remove(self)
-					break				
+					break
 
+				self.other = []
+				if len(self.clients) == 2:
+					for client in self.clients:
+						self.server.sendto('go'.encode(), client)
+					for x in self.clients:
+						self.other.append(x)
+					self.other.remove(self.addr)
+					self.other = self.other[0]
+				
 				if len(self.clients) <= 2:
 					if self.addr not in self.clients:
 						print(f'RECIEVING: {self.data} from {self.addr}')
@@ -66,6 +68,10 @@ class Server(object):
 						print(f'BROADCASTING: {self.data} To {self.other}')
 					else:
 						print('ONLY ONE CLIENT CONNECTED')
+
+				if 'dice' in self.data:
+					for clients in self.clients:
+						self.server.sendto(self.data, client)
 			
 			except Exception as e:
 				print(e)
