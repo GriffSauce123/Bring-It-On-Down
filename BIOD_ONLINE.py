@@ -155,7 +155,7 @@ class Particle(object):
 # ------------------------------------------------------------------------------------------------------------------------------------------ #
 
 def recieve():
-	global m, team, turn, not_team, dice_color, board2_o, board1_o, dice, host, port, go
+	global m, team, turn, not_team, dice_color, board2_o, board1_o, dice, host, port, go, running_online
 	get_team = True
 	print('[ RECIEVING ]')
 	while recieving:
@@ -209,18 +209,21 @@ def recieve():
 				pop.play()
 
 			if 'dice' in m:
-				dice = m[-2:].split(' ')
-				print(f'DICE{dice}')
+				print(f'DICE: {m}')
+				dice = m[-3:].split(' ')
+				print(f'DICE1: {dice}')
+				dice[0], dice[1] = int(dice[0]), int(dice[1])
 				pop.play()
 
 			if 'disconnect' in m:
 				print('CLIENT 2 DISCONNECTED, SERVER SHUTTING DOWN')
+				running_online = False
 				run_menu()
 
 
 			m = ''
-		except:
-			pass
+		except Exception as e:
+			print(e)
 	print('[ NO LONGER RECIEVING ]')
 
 # ------------------------------------------------------------------------------------------------------------------------------------------ #
@@ -315,6 +318,9 @@ def online():
 	print(f'GO STATUS: {go}')
 	while not go:
 		
+		#to update the server
+		send_server('')
+
 		for event in pygame.event.get():
 			#check for an exit request
 			if event.type == pygame.QUIT:
