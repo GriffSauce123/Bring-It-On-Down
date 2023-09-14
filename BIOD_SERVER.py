@@ -2,7 +2,6 @@
 
 # make server not use a seperate thread for every 2 users :(
 # make waiting for connection screen work
-#ideally there is one listener thread, and a broadcast thread for every game (clients / 2)
 
 import socket
 import threading
@@ -18,6 +17,7 @@ class Server(object):
 		self.server.bind((self.ip, self.port))
 		self.clients = []
 		self.team = -1
+		self.run = False
 		
 	def recieve(self):
 		print('RECIEVING\n')
@@ -28,25 +28,28 @@ class Server(object):
 				self.data = self.message.decode()
 
 				if self.data == 'disconnect':
-					self.clients.remove(self.addr)
-					print(f'[ {self.addr} DISCONNECTED ]')
 					if len(self.clients) == 2:
-						self.server.sendto(self.data.encode(), self.other)
-					elif len(self.clients) == 1:
+						self.server.sendto(self.message, self.other)
 						counter -= 1
+					self.clients.remove(self.addr)
+					counter -= 1
 					servers.remove(self)
+					print(f'[ {self.addr} DISCONNECTED ]')
 					break
 
 				self.other = []
 				if len(self.clients) == 2:
-					for client in self.clients:
-						self.server.sendto('go'.encode(), client)
+					if not self.run:
+						for client in self.clients:
+							self.server.sendto('go'.encode(), client)
+							self.run = True
+						
 					for x in self.clients:
 						self.other.append(x)
 					self.other.remove(self.addr)
 					self.other = self.other[0]
 				
-				if len(self.clients) <= 2:
+				if len(self.clients) != 2:
 					if self.addr not in self.clients:
 						print(f'RECIEVING: {self.data} from {self.addr}')
 						self.clients.append(self.addr)
@@ -69,11 +72,12 @@ class Server(object):
 						print('ONLY ONE CLIENT CONNECTED')
 
 				if 'dice' in self.data:
-					for clients in self.clients:
-						self.server.sendto(self.data, client)
+					self.server.sendto(self.message, self.other)
+					print(f'DICE: {self.data}')
 			
 			except Exception as e:
 				print(e)
+				raise(e)
 
 def main():
 	global servers, counter
