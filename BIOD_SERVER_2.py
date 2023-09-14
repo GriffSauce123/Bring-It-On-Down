@@ -5,7 +5,7 @@
 import socket
 import threading
 
-clients = [] # a list of tuples of addrs linked in games Example [('192.111.111.4', '222.222.222.6'), ('182.1151.331.4', '236.482.291.6')]
+clients = [] # a list of lists of addrs linked in games Example [('192.111.111.4', '222.222.222.6'), ('182.1151.331.4', '236.482.291.6')]
 
 def main():
 	global clients
@@ -15,7 +15,7 @@ def main():
 	
 	listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 	listener.bind((ip, port))
-	temp_tuple = ()
+	temp_ls = []
 
 	while True:
 		try:
@@ -23,15 +23,15 @@ def main():
 			data = message.decode()			
 			print(f'Total Clients: {clients})')
 
-			#adding the client to the tuple to determine each game. Checking if the addr is in the tuple already because this is the main listener thread
+			#adding the client to the list to determine each game. Checking if the addr is in the list already because this is the main listener thread
 			#checks if client is in the nested list
 			if not any(addr in sl for sl in clients):
 				
-				if len(temp_tuple) < 2:
-					temp_tuple.append(addr)
-					if len(temp_tuple) == 2:
-						clients.append(temp_tuple)
-						temp_tuple = ()
+				if len(temp_ls) < 2:
+					temp_ls.append(addr)
+					if len(temp_ls) == 2:
+						clients.append(temp_ls)
+						temp_ls = []
 
 			elif any(addr in sl for sl in clients):
 				
@@ -67,23 +67,12 @@ def main():
 					listener.sendto(message, temp_opp)
 					print(f'BROADCASTING: {data} To {temp_opp}')
 
-
-
-
-
-
-
-
-
-
 		except Exception as e:
 			print(e)
 			print(f'DISCONNECTED: {addr}')
-			for tup in clients:
-				if addr in tup:
-					clients.remove(tup)
+			for ls in clients:
+				if addr in ls:
+					clients.remove(ls)
 
-
-	
 if __name__ == '__main__':
 	main()
