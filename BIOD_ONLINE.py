@@ -155,14 +155,14 @@ class Particle(object):
 # ------------------------------------------------------------------------------------------------------------------------------------------ #
 
 def recieve():
-	global m, team, turn, not_team, dice_color, board2_o, board1_o, dice, host, port
+	global m, team, turn, not_team, dice_color, board2_o, board1_o, dice, host, port, go
 	get_team = True
 	print('[ RECIEVING ]')
 	while recieving:
 		try:
 			message = client.recvfrom(1024)
 			m = message[0].decode()
-			#print(f'\nMESSAGE: {m}\n')
+			print(f'\nMESSAGE: {m}\n')
 
 			if '|' in m:
 				host = m.split('|')[0]
@@ -311,11 +311,8 @@ def online():
 		continue
 
 	#WAITING SCREEN WHILE SERVER LOOKS FOR PLAYER 2
+	go = False#True
 	print(f'GO STATUS: {go}')
-	arc = 0
-	arc2 = 0
-	av = 0.008
-	av1 = 0.002
 	while not go:
 		
 		for event in pygame.event.get():
@@ -328,18 +325,13 @@ def online():
 				if event.key == pygame.K_ESCAPE:
 					pause()
 			
+		if go == True:
+			break
+
 		screen.fill((255, 255, 255))
 		t_width, t_height = dice_font.size('WAITING FOR PLAYER 2')
 		screen.blit((dice_font.render(f'WAITING FOR PLAYER 2', False, (0, 0, 0))), [width / 2 - t_width / 2, height / 3 - t_height / 2]) # turn into width
 		pygame.draw.circle(screen, (200, 200, 200), [width / 2, height / 2], 11 * int(width / 320), int(width / 128))
-		pi = 3.141592653589793238
-		pygame.draw.arc(screen, (100, 100, 255), (width / 2 - 11 * int(width / 320), height / 2 - 11 * int(width / 320), 22 * int(width / 320), 22 * int(width / 320)), arc, arc2, int(width / 128))
-
-		arc += av
-		arc2 += av1
-
-		if arc - arc2 >= 2 * pi:
-			arc2, arc = arc, arc2
 
 		pygame.display.flip()
 		clock.tick(240)
@@ -465,6 +457,7 @@ def button_quit():
 	pop.play()
 	try:
 		send_server('disconnect')
+		print('DISCONNECTED')
 	except Exception as e:
 		pass
 	time.sleep(0.1)
