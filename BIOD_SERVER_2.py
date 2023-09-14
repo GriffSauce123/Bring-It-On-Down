@@ -26,15 +26,15 @@ def main():
 			#adding the client to the list to determine each game. Checking if the addr is in the list already because this is the main listener thread
 			#checks if client is in the nested list
 			if not any(addr in sl for sl in clients):
-				
 				if len(temp_ls) < 2:
 					temp_ls.append(addr)
 					if len(temp_ls) == 2:
 						clients.append(temp_ls)
+						listener.sendto('go'.encode(), temp_ls[0])
+						listener.sendto('go'.encode(), temp_ls[1])
 						temp_ls = []
 
 			elif any(addr in sl for sl in clients):
-				
 				#finds the indecies of the client within the lsit (outer index, inner index)
 				indecies = [(i, el.index(addr)) for i, el in enumerate(clients) if 2 in el]
 				temp_client = addr
@@ -68,11 +68,8 @@ def main():
 					print(f'BROADCASTING: {data} To {temp_opp}')
 
 		except Exception as e:
-			print(e)
-			print(f'DISCONNECTED: {addr}')
-			for ls in clients:
-				if addr in ls:
-					clients.remove(ls)
+			print(e)			
+
 
 if __name__ == '__main__':
 	main()
