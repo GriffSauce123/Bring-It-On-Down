@@ -1,6 +1,6 @@
-	# BRING IT ON DOWN - Griffin Adelmann
-# August 15 2023
-# Alpha 0.5 - Online - Functioning, multi client filtering, disconnection detection
+# BRING IT ON DOWN - Griffin Adelmann
+# Sept 16 2023
+# Alpha 0.8 - Online/Offline play, efficient server connection, exit to menu, dice consistency
 
 import random, sys, pygame, time, socket, threading, os
 
@@ -41,9 +41,9 @@ class Button(object):
 	#drawing screen objects
 	def draw(self):
 		pygame.draw.rect(screen, (255,255,255), self.rect, 0, border_radius = 1000)
-		pygame.draw.rect(screen, self.color, self.rect, 5, border_radius = 1000)
+		pygame.draw.rect(screen, self.color, self.rect, round(width / 384), border_radius = 1000)
 		if self.rect.collidepoint(pygame.mouse.get_pos()):
-			pygame.draw.rect(screen, dice_color, self.rect, 5, border_radius = 1000)
+			pygame.draw.rect(screen, dice_color, self.rect, round(width / 384), border_radius = 1000)
 		
 		screen.blit((self.font.render(str(self.text), False, self.color)), (self.render_pos[0] + width / 38.4, self.render_pos[1] + width / 80))
 
@@ -54,7 +54,7 @@ class Segment(object):
 		self.num = num
 		self.pos = pos
 		self.team = team
-		self.rad = int(width / 32)
+		self.rad = round(width / 32)
 		self.stat = 0
 		self.board = board
 		self.color = (0, 0, 0)
@@ -79,32 +79,32 @@ class Segment(object):
 		#highlighting playable spaces
 		if highlight:
 		 if self.num in dice or self.num == dice[0] + dice[1]:
-				pygame.draw.rect(screen, 'lime', [self.pos[0] - self.rad - int(width / 160), self.pos[1] - self.rad - int(height / 15) - self.rad * self.board, self.rad * 2 + int(width / 80), self.rad * 4 + int(width / 80)], int(width / 256), border_radius = 1000)
-				pygame.draw.circle(screen, 'lime', [self.pos[0], self.pos[1] - int(width / 8) * self.board], self.rad + int(width / 160), int(width / 256))
+				pygame.draw.rect(screen, 'lime', [self.pos[0] - self.rad - round(width / 160), self.pos[1] - self.rad - round(height / 15) - self.rad * self.board, self.rad * 2 + round(width / 80), self.rad * 4 + round(width / 80)], round(width / 256), border_radius = 1000)
+				pygame.draw.circle(screen, 'lime', [self.pos[0], self.pos[1] - round(width / 8) * self.board], self.rad + round(width / 160), round(width / 256))
 		
 		#outline
-		pygame.draw.rect(screen, self.color, self.rect, int(width / 160), border_radius = 1000)
-		pygame.draw.rect(screen, (0,0,0), [self.pos[0] - self.rad - int(width / 320), self.pos[1] - self.rad - int(width / 29) - self.rad * self.board, self.rad * 2 + int(width / 160), self.rad * 4 + int(width / 160)], int(width / 320), border_radius = 1000)
+		pygame.draw.rect(screen, self.color, self.rect, round(width / 160), border_radius = 1000)
+		pygame.draw.rect(screen, (0,0,0), [self.pos[0] - self.rad - round(width / 320), self.pos[1] - self.rad - round(width / 29) - self.rad * self.board, self.rad * 2 + round(width / 160), self.rad * 4 + round(width / 160)], round(width / 320), border_radius = 1000)
 
 		#player piece                                 x                                    y
-		pygame.draw.circle(screen, self.color, [self.pos[0], self.pos[1] + (int(width / 16) * self.stat * self.board * -1)], self.rad, int(height / 40))
+		pygame.draw.circle(screen, self.color, [self.pos[0], self.pos[1] + (int(width / 16) * self.stat * self.board * -1)], self.rad, round(height / 40))
 		
 		#safe space
-		pygame.draw.circle(screen, self.color, [self.pos[0], self.pos[1] - int(width / 8) * self.board], self.rad, int(width / 160))
-		pygame.draw.circle(screen, (0, 0, 0), [self.pos[0], self.pos[1] - int(width / 8) * self.board], self.rad + int(width / 320), int(width / 256))
+		pygame.draw.circle(screen, self.color, [self.pos[0], self.pos[1] - round(width / 8) * self.board], self.rad, round(width / 160))
+		pygame.draw.circle(screen, (0, 0, 0), [self.pos[0], self.pos[1] - round(width / 8) * self.board], self.rad + round(width / 320), round(width / 256))
 
 		#Render the num assigned with the segment
-		screen.blit(self.text_s, (self.pos[0] - self.text_width / 2, self.pos[1] - int(width / 8) * self.board - self.text_height / 3))
+		screen.blit(self.text_s, (self.pos[0] - self.text_width / 2, self.pos[1] - round(width / 8) * self.board - self.text_height / 3))
 
 	def update(self):
 		def dice_check():
 			global dice
 			#checking to see if move is legal and reseting dice when necessary
 			for i in range(2):
-				if int(dice[i]) == int(self.num):
+				if round(dice[i]) == round(self.num):
 					dice[i] = 0
 					break
-				if int(dice[0]+dice[1]) == int(self.num):
+				if round(dice[0]+dice[1]) == round(self.num):
 					dice = [0,0]
 
 		#updating stat of pieces
@@ -115,21 +115,24 @@ class Segment(object):
 				if turn % 2 != 0 and self.team == -1 or turn % 2 == 0 and self.team == 1:
 					self.stat = 1
 					dice_check()
-					send_server(str(self.board) + '.' + str(self.num) + '.' + str(self.stat))
+					if running_online:
+						send_server(str(self.board) + '.' + str(self.num) + '.' + str(self.stat))
 					pop.play()
 
 			elif self.stat == 2:
 				if turn % 2 != 0 and self.team == -1 or turn % 2 == 0 and self.team == 1:
 					self.stat = 1
 					dice_check()
-					send_server(str(self.board) + '.' + str(self.num) + '.' + str(self.stat))
+					if running_online:
+						send_server(str(self.board) + '.' + str(self.num) + '.' + str(self.stat))
 					pop.play()
 
 			elif self.stat == 1:
 				if turn % 2 == 0 and self.team == -1 or turn % 2 != 0 and self.team == 1:
 					self.stat = 0
 					dice_check()
-					send_server(str(self.board) + '.' + str(self.num) + '.' + str(self.stat))
+					if running_online:
+						send_server(str(self.board) + '.' + str(self.num) + '.' + str(self.stat))
 					pop.play()
 
 # ------------------------------------------------------------------------------------------------------------------------------------------ #
@@ -169,7 +172,7 @@ def recieve():
 				port = int(m.split('|')[1])
 
 				#requesting the team variable:
-				send_server('team')
+				send_server('t')
 
 			if m == '-1' or m == '1':
 				if get_team:
@@ -185,7 +188,7 @@ def recieve():
 				print('GO RECIEVED')
 				go = True
 
-			if m == 'turn':
+			if m == 'tu':
 				print(f'RECIEVED TURN')  
 				
 				pop.play()
@@ -208,14 +211,14 @@ def recieve():
 					board2_o[int(temp[1]) - 1].change_value(int(temp[2]))
 				pop.play()
 
-			if 'dice' in m:
+			if m[0] == 'd':
 				print(f'DICE: {m}')
 				dice = m[-3:].split(' ')
 				print(f'DICE1: {dice}')
-				dice[0], dice[1] = int(dice[0]), int(dice[1])
+				dice[0], dice[1] = round(dice[0]), round(dice[1])
 				pop.play()
 
-			if 'disconnect' in m:
+			if 'dc' in m:
 				print('CLIENT 2 DISCONNECTED, SERVER SHUTTING DOWN')
 				running_online = False
 				go = True
@@ -241,7 +244,7 @@ def roll_dice():
 	if team == -1 and turn % 2 == 1 or team == 1 and turn % 2 == 0:
 		dice = [random.randint(1, 6), random.randint(1, 6)]
 		pop.play()
-		send_server('dice' + str(dice[0]) + ' ' + str(dice[1]))
+		send_server('d' + str(dice[0]) + ' ' + str(dice[1]))
 
 def roll_dice_offline():
 	global dice
@@ -258,7 +261,7 @@ def change_turn_online():
 			if s.stat == 1:
 				s.stat = 2
 				send_server(str(s.board) + '.' + str(s.num) + '.' + str(s.stat))
-		send_server('turn')
+		send_server('tu')
 		pop.play()
 
 		turn += 1
@@ -274,7 +277,7 @@ def change_turn_online():
 			if s.stat == 1:
 				s.stat = 2
 				send_server(str(s.board) + '.' + str(s.num) + '.' + str(s.stat))
-		send_server('turn')
+		send_server('tu')
 		pop.play()
 
 		turn += 1
@@ -309,8 +312,8 @@ def offline():
 	pop.play()
 
 	#creating the player boards
-	board1 = [Segment(x + 1, (x * int(width / 12.8) + int(height / 8) + ((12 - segments) * int(width / 25.3)), int(height * (8 / 9))), -1, 1) for x in range(segments)]
-	board2 = [Segment(x + 1, (x * int(width / 12.8) + int(height / 8) + ((12 - segments) * int(width / 25.3)), int(height / 9)), 1, -1) for x in range(segments)]
+	board1 = [Segment(x + 1, (x * round(width / 12.8) + round(height / 8) + ((12 - segments) * round(width / 25.3)), round(height * (8 / 9))), -1, 1) for x in range(segments)]
+	board2 = [Segment(x + 1, (x * round(width / 12.8) + round(height / 8) + ((12 - segments) * round(width / 25.3)), round(height / 9)), 1, -1) for x in range(segments)]
 
 	#creating the button class instances
 	dice_button = Button((0, 0, 0), (width * 0.8, height / 2), roll_dice_offline, 'Roll Dice', font) # turn into width
@@ -389,11 +392,11 @@ def offline():
 			s.draw()
 
 		#drawing the dice area
-		pygame.draw.rect(screen, dice_color, [width / 2 - int(height / 3.2), height / 2 - int(height / 12.8), int(height / 1.6), int(height / 6.4)], 0, border_radius = 1000)
-		pygame.draw.rect(screen, (0, 0, 0), [width / 2 - int(height / 3.2), height / 2 - int(height / 12.8), int(height / 1.6), int(height / 6.4)], int(width / 256), border_radius = 1000)
+		pygame.draw.rect(screen, dice_color, [width / 2 - round(height / 3.2), height / 2 - round(height / 12.8), round(height / 1.6), round(height / 6.4)], 0, border_radius = 1000)
+		pygame.draw.rect(screen, (0, 0, 0), [width / 2 - round(height / 3.2), height / 2 - round(height / 12.8), round(height / 1.6), round(height / 6.4)], round(width / 256), border_radius = 1000)
 		
 		#drawing the nums on the dice
-		screen.blit((dice_font.render(str(dice[0]) + '     ' + str(dice[1]), False, (0,0,0))), [width / 2 - int(height / 11.4), height / 2 - int(height / 32)])
+		screen.blit((dice_font.render(str(dice[0]) + '     ' + str(dice[1]), False, (0,0,0))), [width / 2 - round(height / 11.4), height / 2 - round(height / 32)])
 		
 		#buttons
 		dice_button.draw()
@@ -430,7 +433,7 @@ def online():
 	t1.daemon = True
 	t1.start()
 
-	send_server('Request To Connect')
+	send_server('R')
 
 	pop.play()
 
@@ -448,7 +451,7 @@ def online():
 		if go == True:
 			break
 		#to update the server
-		send_server('')
+		send_server('G')
 
 		for event in pygame.event.get():
 			#check for an exit request
@@ -474,8 +477,8 @@ def online():
 # ------------------------------------------------------------------------------------------------------------------------------------------ #
 
 	#creating the player boards
-	board1_o = [Segment(x + 1, (x * int(width / 12.8) + int(height / 8) + ((12 - segments) * int(width / 25.3)), int(height * (8 / 9))), team, 1) for x in range(segments)] # turn into width
-	board2_o = [Segment(x + 1, (x * int(width / 12.8) + int(height / 8) + ((12 - segments) * int(width / 25.3)), int(height / 9)), not_team, -1) for x in range(segments)]
+	board1_o = [Segment(x + 1, (x * round(width / 12.8) + round(height / 8) + ((12 - segments) * round(width / 25.3)), round(height * (8 / 9))), team, 1) for x in range(segments)] # turn into width
+	board2_o = [Segment(x + 1, (x * round(width / 12.8) + round(height / 8) + ((12 - segments) * round(width / 25.3)), round(height / 9)), not_team, -1) for x in range(segments)]
 
 	#creating the button class instances
 	dice_button = Button((0, 0, 0), (width * 0.8, height / 2), roll_dice, 'Roll Dice', font) # turn into width
@@ -557,11 +560,11 @@ def online():
 			s.draw()
 
 		#drawing the dice area
-		pygame.draw.rect(screen, dice_color, [width / 2 - int(height / 3.2), height / 2 - int(height / 12.8), int(height / 1.6), int(height / 6.4)], 0, border_radius = 1000) # turn into width
-		pygame.draw.rect(screen, (0, 0, 0), [width / 2 - int(height / 3.2), height / 2 - int(height / 12.8), int(height / 1.6), int(height / 6.4)], int(width / 256), border_radius = 1000)
+		pygame.draw.rect(screen, dice_color, [width / 2 - round(height / 3.2), height / 2 - round(height / 12.8), round(height / 1.6), round(height / 6.4)], 0, border_radius = 1000) # turn into width
+		pygame.draw.rect(screen, (0, 0, 0), [width / 2 - round(height / 3.2), height / 2 - round(height / 12.8), round(height / 1.6), round(height / 6.4)], round(width / 256), border_radius = 1000)
 		
 		#drawing the nums on the dice
-		screen.blit((dice_font.render(str(dice[0]) + '     ' + str(dice[1]), False, (0,0,0))), [width / 2 - int(height / 11.4), height / 2 - int(height / 32)])
+		screen.blit((dice_font.render(str(dice[0]) + '     ' + str(dice[1]), False, (0,0,0))), [width / 2 - round(height / 11.4), height / 2 - round(height / 32)])
 		
 		#buttons
 		dice_button.draw()
@@ -591,7 +594,7 @@ def light():
 def button_quit():
 	pop.play()
 	try:
-		send_server('disconnect')
+		send_server('dc')
 		print('DISCONNECTED')
 	except Exception as e:
 		pass
@@ -608,7 +611,7 @@ def run_menu():
 	menu = True
 	recieving = False
 	
-	send_server('disconnect')
+	send_server('dc')
 	try:
 		client.close()
 	except Exception as e:
@@ -617,8 +620,8 @@ def run_menu():
 	#initial states of variables
 	dice_color = (255, 100, 100)
 
-	quit_button = Button((0, 0, 0), (width - int(width / 16), int(width / 30)), button_quit, 'Quit', font)
-	menu_button = Button((0, 0, 0), (width - int(width / 6), int(width / 30)), run_menu, 'Menu', font) 
+	quit_button = Button((0, 0, 0), (width - round(width / 16), round(width / 30)), button_quit, 'Quit', font)
+	menu_button = Button((0, 0, 0), (width - round(width / 6), round(width / 30)), run_menu, 'Menu', font) 
 	game = Button((0,0,0), (width / 2, height * 0.7),  online, 'Online Game', dice_font)
 	game_offline = Button((0,0,0), (width / 2, height * 0.85 ), offline, 'Local Game', dice_font)
 	highlights = Button((0, 0, 0), (width / 2, height * 0.55), light, 'Highlights     ', dice_font) # turn into height
@@ -644,8 +647,8 @@ def run_menu():
 		quit_button.draw()
 		highlights.draw()
 		if highlight:
-			pygame.draw.circle(screen, 'lime', (width / 2 + int(height / 4), height / 2 + int(height / 20)), int(height / 24), 0) # turn into width
-		pygame.draw.circle(screen, 'black', (width / 2 + int(height / 4), height / 2 + int(height / 20)), int(height / 24), int(width / 320))
+			pygame.draw.circle(screen, 'lime', (width / 2 + round(height / 4), height / 2 + round(height / 20)), round(height / 24), 0) # turn into width
+		pygame.draw.circle(screen, 'black', (width / 2 + round(height / 4), height / 2 + round(height / 20)), round(height / 24), round(width / 320))
 
 
 		pygame.display.flip()
@@ -680,8 +683,8 @@ def pause():
 
 		pygame.draw.rect(screen, dice_color, (0,0, width, height), 0)
 
-		screen.blit((dice_font.render(f'Press ESCAPE To Return To Game', False, (0, 0, 0))), [int(width / 6.4), height / 2 - int(height / 10.3)])
-		screen.blit((dice_font.render(f'Turn: {str(turn)}', False, (0, 0, 0))),[width / 2 - int(width / 15.238), height / 2 + int(height / 30)])
+		screen.blit((dice_font.render(f'Press ESCAPE To Return To Game', False, (0, 0, 0))), [int(width / 6.4), height / 2 - round(height / 10.3)])
+		screen.blit((dice_font.render(f'Turn: {str(turn)}', False, (0, 0, 0))),[width / 2 - round(width / 15.238), height / 2 + round(height / 30)])
 
 		quit_button.draw()
 		menu_button.draw()
@@ -703,7 +706,7 @@ def win():
 				button_quit()
 			
 			if event.type == pygame.KEYDOWN:
-				button_quit()
+				pause()
 		
 		screen.fill('white')
 
@@ -729,20 +732,44 @@ if __name__ == '__main__':
 	pygame.font.init()
 
 	#ASPECT RATIO MUST BE 16 x 9 FOR CORRECT SCALING OF OBJECTS
-	height = 1080 #pygame.display.Info().current_h
-	width = 1920 #pygame.display.Info().current_w
+	s_width = pygame.display.Info().current_w
+	s_height = pygame.display.Info().current_h
 
+	# an imaginary box that contains game objects so the scale of things work correctly on different size screens
+	#ratio to find the difference in width or height to the 16x9 aspect ratio to scale the screen elements
+	ratio = (s_width / 16 ) / ( s_height / 9 )
+
+	if ratio < 1:
+		print('hight is too large')
+		width = s_width
+		height = width * ( 9 / 16 )
+
+	elif ratio > 1:
+		print('width is too large')
+		height = s_height
+		width = height * ( 16 / 9 )
+
+	elif ratio == 1:
+		print('Screen is 16 x 9')
+		width, height = s_width, s_height
+
+	#creating the screen
+	screen = pygame.display.set_mode((width, height))#, pygame.FULLSCREEN)
+	
 	#loading images and captions and things
-	loading_icon = pygame.image.load('loading.png')
-	icon = pygame.image.load('icon-0.2.png')
+	loading_icon = pygame.image.load('loading.png').convert_alpha()
+	loading_icon = pygame.transform.smoothscale(loading_icon, (height / 4,height / 4))
+	icon = pygame.image.load('icon-0.2.png').convert_alpha()
+	icon = pygame.transform.smoothscale(icon, (height / 2,height / 2))
+
+
 	pop = pygame.mixer.Sound('pop.wav')
 
 	pygame.display.set_icon(icon)
 	pygame.display.set_caption('Bring It On Down')
 
-	screen = pygame.display.set_mode((width, height), pygame.FULLSCREEN)
-	font = pygame.font.SysFont('', int(height / 24))
-	dice_font = pygame.font.SysFont('', int(height / 9.6))
+	font = pygame.font.SysFont('', round(height / 24))
+	dice_font = pygame.font.SysFont('', round(height / 9.6))
 	clock = pygame.time.Clock()
 	turn = 1
 	team = 0
