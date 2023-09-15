@@ -1,6 +1,6 @@
-	# BRING IT ON DOWN - Griffin Adelmann
-# August 15 2023
-# Alpha 0.5 - Online - Functioning, multi client filtering, disconnection detection
+# BRING IT ON DOWN - Griffin Adelmann
+# August 16 2023
+# Alpha 0.8
 
 import random, sys, pygame, time, socket, threading, os
 
@@ -26,6 +26,7 @@ class Button(object):
 		#so the text renders properly
 		self.text_width, self.text_height = self.font.size(self.text)
 		self.size = [self.text_width + width / 19.2, self.text_height + width / 48]
+		print(self.text, self.size[1])
 		if self.font == dice_font:
 			self.size[0] = width / 2.8
 
@@ -48,7 +49,7 @@ class Button(object):
 		if self.rect.collidepoint(pygame.mouse.get_pos()):
 			pygame.draw.rect(screen, dice_color, self.rect, round(width / 384), border_radius = 1000)
 		
-		screen.blit((self.font.render(str(self.text), False, self.color)), (self.render_pos[0] + self.padding, self.render_pos[1] + width / 80))
+		screen.blit((self.font.render(str(self.text), True, self.color)), (self.render_pos[0] + self.padding, self.render_pos[1] + width / 80))
 
 # ------------------------------------------------------------------------------------------------------------------------------------------ #
 
@@ -71,7 +72,7 @@ class Segment(object):
 		self.rect = pygame.Rect(self.pos[0] - self.rad, self.pos[1] - self.rad - (width / 32) - self.rad * self.board, self.rad * 2, self.rad * 4)
 
 		#pygame surface to render the num on
-		self.text_s = font.render(str(self.num), False, self.color)
+		self.text_s = font.render(str(self.num), True, self.color)
 		self.text_width, self.text_height = font.size(str(self.num))
 
 	def change_value(self, value):
@@ -399,7 +400,7 @@ def offline():
 		pygame.draw.rect(screen, (0, 0, 0), [width / 2 - round(height / 3.2), height / 2 - round(height / 12.8), round(height / 1.6), round(height / 6.4)], round(width / 256), border_radius = 1000)
 		
 		#drawing the nums on the dice
-		screen.blit((dice_font.render(str(dice[0]) + '     ' + str(dice[1]), False, (0,0,0))), [width / 2 - round(height / 11.4), height / 2 - round(height / 32)])
+		screen.blit((dice_font.render(str(dice[0]) + '     ' + str(dice[1]), True, (0,0,0))), [width / 2 - round(height / 11.4), height / 2 - round(height / 32)])
 		
 		#buttons
 		dice_button.draw()
@@ -469,7 +470,7 @@ def online():
 
 		screen.fill((255, 255, 255))
 		t_width, t_height = dice_font.size('WAITING FOR PLAYER 2')
-		screen.blit((dice_font.render(f'WAITING FOR PLAYER 2', False, (0, 0, 0))), [width / 2 - t_width / 2, height / 3 - t_height / 2]) # turn into width
+		screen.blit((dice_font.render(f'WAITING FOR PLAYER 2', True, (0, 0, 0))), [width / 2 - t_width / 2, height / 3 - t_height / 2]) # turn into width
 		img_copy = pygame.transform.rotate(loading_icon, angle)
 		screen.blit(img_copy, (width / 2 - img_copy.get_width() / 2, height / 2 - img_copy.get_height() / 2))
 		angle += 3
@@ -567,7 +568,7 @@ def online():
 		pygame.draw.rect(screen, (0, 0, 0), [width / 2 - round(height / 3.2), height / 2 - round(height / 12.8), round(height / 1.6), round(height / 6.4)], round(width / 256), border_radius = 1000)
 		
 		#drawing the nums on the dice
-		screen.blit((dice_font.render(str(dice[0]) + '     ' + str(dice[1]), False, (0,0,0))), [width / 2 - round(height / 11.4), height / 2 - round(height / 32)])
+		screen.blit((dice_font.render(str(dice[0]) + '     ' + str(dice[1]), True, (0,0,0))), [width / 2 - round(height / 11.4), height / 2 - round(height / 32)])
 		
 		#buttons
 		dice_button.draw()
@@ -690,8 +691,8 @@ def pause():
 
 		pygame.draw.rect(screen, dice_color, (0,0, width, height), 0)
 
-		screen.blit((dice_font.render(f'Press ESCAPE To Return To Game', False, (0, 0, 0))), [int(width / 6.4), height / 2 - round(height / 10.3)])
-		screen.blit((dice_font.render(f'Turn: {str(turn)}', False, (0, 0, 0))),[width / 2 - round(width / 15.238), height / 2 + round(height / 30)])
+		screen.blit((dice_font.render(f'Press ESCAPE To Return To Game', True, (0, 0, 0))), [int(width / 6.4), height / 2 - round(height / 10.3)])
+		screen.blit((dice_font.render(f'Turn: {str(turn)}', True, (0, 0, 0))),[width / 2 - round(width / 15.238), height / 2 + round(height / 30)])
 
 		quit_button.draw()
 		menu_button.draw()
@@ -724,9 +725,9 @@ def win():
 			particle.update()
 
 		if dice_color == (255, 100, 100):
-			screen.blit((dice_font.render('RED TEAM WINS!', False, (0, 0, 0))),[width / 3, height / 2])
+			screen.blit((dice_font.render('RED TEAM WINS!', True, (0, 0, 0))),[width / 3, height / 2])
 		elif dice_color == (100, 100, 255):
-			screen.blit((dice_font.render('BLUE TEAM WINS!', False, (0, 0, 0))),[width / 3, height / 2])
+			screen.blit((dice_font.render('BLUE TEAM WINS!', True, (0, 0, 0))),[width / 3, height / 2])
 
 		clock.tick(240)
 		pygame.display.flip()
