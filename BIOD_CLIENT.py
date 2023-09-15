@@ -437,6 +437,7 @@ def online():
 # ------------------------------------------------------------------------------------------------------------------------------------------ #
 
 	#making sure the game only starts once team is given from the server
+	angle = 0
 	while team == 0:
 		continue
 
@@ -463,7 +464,9 @@ def online():
 		screen.fill((255, 255, 255))
 		t_width, t_height = dice_font.size('WAITING FOR PLAYER 2')
 		screen.blit((dice_font.render(f'WAITING FOR PLAYER 2', False, (0, 0, 0))), [width / 2 - t_width / 2, height / 3 - t_height / 2]) # turn into width
-		pygame.draw.circle(screen, (200, 200, 200), [width / 2, height / 2], 11 * int(width / 320), int(width / 128))
+		img_copy = pygame.transform.rotate(loading_icon, angle)
+		screen.blit(img_copy, (width / 2 - img_copy.get_width() / 2, height / 2 - img_copy.get_height() / 2))
+		angle += 3
 
 		pygame.display.flip()
 		clock.tick(240)
@@ -635,10 +638,6 @@ def run_menu():
 		screen.fill('white')
 		screen.blit(icon, (width / 2 - icon.get_width() / 2, height * 0.25 - icon.get_height() / 2))
 
-		#Draws lines to center things
-		#pygame.draw.line(screen, (0, 0, 0), [width / 2, 0], [width / 2,height], 1)
-		#pygame.draw.line(screen, (0, 0, 0), [0, height / 2], [width,height / 2], 1)
-
 		#some buttons here
 		game.draw()
 		game_offline.draw()
@@ -679,8 +678,6 @@ def pause():
 				quit_button.function()
 				menu_button.function()
 
-		#background
-		#screen.fill('white')
 		pygame.draw.rect(screen, dice_color, (0,0, width, height), 0)
 
 		screen.blit((dice_font.render(f'Press ESCAPE To Return To Game', False, (0, 0, 0))), [int(width / 6.4), height / 2 - int(height / 10.3)])
@@ -736,14 +733,12 @@ if __name__ == '__main__':
 	width = 1920 #pygame.display.Info().current_w
 
 	#loading images and captions and things
+	loading_icon = pygame.image.load('loading.png')
 	icon = pygame.image.load('icon-0.2.png')
 	pop = pygame.mixer.Sound('pop.wav')
 
-	#banner = pygame.image.load('banner.png') # The title for the main menu and such
-
 	pygame.display.set_icon(icon)
 	pygame.display.set_caption('Bring It On Down')
-
 
 	screen = pygame.display.set_mode((width, height), pygame.FULLSCREEN)
 	font = pygame.font.SysFont('', int(height / 24))
@@ -759,8 +754,6 @@ if __name__ == '__main__':
 	highlight = False
 	dice = [0,0]
  
-# ------------------------------------------------------------------------------------------------------------------------------------------ #
-
 # ------------------------------------------------------------------------------------------------------------------------------------------ #
 
 	run_menu()
