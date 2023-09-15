@@ -1,6 +1,6 @@
-# BRING IT ON DOWN - Griffin Adelmann
-# Sept 16 2023
-# Alpha 0.8 - Online/Offline play, efficient server connection, exit to menu, dice consistency
+	# BRING IT ON DOWN - Griffin Adelmann
+# August 15 2023
+# Alpha 0.5 - Online - Functioning, multi client filtering, disconnection detection
 
 import random, sys, pygame, time, socket, threading, os
 
@@ -25,9 +25,12 @@ class Button(object):
 		
 		#so the text renders properly
 		self.text_width, self.text_height = self.font.size(self.text)
-		self.size = (self.text_width + width / 19.2, self.text_height + width / 48)
+		self.size = [self.text_width + width / 19.2, self.text_height + width / 48]
+		if self.font == dice_font:
+			self.size[0] = width / 2.8
 
 		#to center things properly
+		self.padding = (self.size[0] - self.text_width) / 2
 		self.render_pos = (self.pos[0] - self.size[0] / 2, self.pos[1] - self.size[1] / 2)
 
 		#rect for click detection
@@ -45,7 +48,7 @@ class Button(object):
 		if self.rect.collidepoint(pygame.mouse.get_pos()):
 			pygame.draw.rect(screen, dice_color, self.rect, round(width / 384), border_radius = 1000)
 		
-		screen.blit((self.font.render(str(self.text), False, self.color)), (self.render_pos[0] + width / 38.4, self.render_pos[1] + width / 80))
+		screen.blit((self.font.render(str(self.text), False, self.color)), (self.render_pos[0] + self.padding, self.render_pos[1] + width / 80))
 
 # ------------------------------------------------------------------------------------------------------------------------------------------ #
 
@@ -163,7 +166,7 @@ def recieve():
 	print('[ RECIEVING ]')
 	while recieving:
 		try:
-			message = client.recvfrom(1024)
+			message = client.recvfrom(64)
 			m = message[0].decode()
 			print(f'\nMESSAGE: {m}\n')
 
@@ -304,7 +307,7 @@ def change_turn():
 		dice = [0,0]
 		turn += 1
 		pop.play()
-
+ 
 # ------------------------------------------------------------------------------------------------------------------------------------------ #
 
 def offline():
@@ -622,9 +625,11 @@ def run_menu():
 
 	quit_button = Button((0, 0, 0), (width - round(width / 16), round(width / 30)), button_quit, 'Quit', font)
 	menu_button = Button((0, 0, 0), (width - round(width / 6), round(width / 30)), run_menu, 'Menu', font) 
-	game = Button((0,0,0), (width / 2, height * 0.7),  online, 'Online Game', dice_font)
-	game_offline = Button((0,0,0), (width / 2, height * 0.85 ), offline, 'Local Game', dice_font)
-	highlights = Button((0, 0, 0), (width / 2, height * 0.55), light, 'Highlights     ', dice_font) # turn into height
+	
+	game = Button((0,0,0), (width / 4, height * 0.4),  online, 'Online Game', dice_font)
+	game_offline = Button((0,0,0), (width / 4, height * 0.55 ), offline, 'Local Game', dice_font)
+	direct_connect = Button((0,0,0), (width / 4, height * 0.7 ), online, 'Connect', dice_font)
+	highlights = Button((0, 0, 0), (width / 4, height * 0.25), light, 'Highlights     ', dice_font) # turn into height
 	
 	while menu and not running_online:
 		for event in pygame.event.get():
@@ -636,19 +641,21 @@ def run_menu():
 				game_offline.function()
 				highlights.function()
 				quit_button.function()
+				direct_connect.function()
 
 		# background
 		screen.fill('white')
-		screen.blit(icon, (width / 2 - icon.get_width() / 2, height * 0.25 - icon.get_height() / 2))
+		screen.blit(icon, (width * 0.7 - icon.get_width() / 2, height / 2 - icon.get_height() / 2))
 
 		#some buttons here
 		game.draw()
+		direct_connect.draw()
 		game_offline.draw()
 		quit_button.draw()
 		highlights.draw()
 		if highlight:
-			pygame.draw.circle(screen, 'lime', (width / 2 + round(height / 4), height / 2 + round(height / 20)), round(height / 24), 0) # turn into width
-		pygame.draw.circle(screen, 'black', (width / 2 + round(height / 4), height / 2 + round(height / 20)), round(height / 24), round(width / 320))
+			pygame.draw.circle(screen, 'lime', (width / 4 + round(height / 4), height * 0.25), round(height / 24), 0) # turn into width
+		pygame.draw.circle(screen, 'black', (width / 4 + round(height / 4), height * 0.25), round(height / 24), round(width / 320))
 
 
 		pygame.display.flip()
@@ -757,15 +764,15 @@ if __name__ == '__main__':
 	screen = pygame.display.set_mode((width, height))#, pygame.FULLSCREEN)
 	
 	#loading images and captions and things
-	loading_icon = pygame.image.load('loading.png').convert_alpha()
+	loading_icon = pygame.image.load('loading.png')#.convert_alpha()
 	loading_icon = pygame.transform.smoothscale(loading_icon, (height / 4,height / 4))
-	icon = pygame.image.load('icon-0.2.png').convert_alpha()
+	icon = pygame.image.load('icon-512.jpg')#.convert_alpha()
 	icon = pygame.transform.smoothscale(icon, (height / 2,height / 2))
 
 
 	pop = pygame.mixer.Sound('pop.wav')
 
-	pygame.display.set_icon(icon)
+	pygame.display.set_icon(pygame.image.load('icon-small.png'))
 	pygame.display.set_caption('Bring It On Down')
 
 	font = pygame.font.SysFont('', round(height / 24))
