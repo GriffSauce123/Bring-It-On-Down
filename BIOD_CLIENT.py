@@ -171,7 +171,7 @@ class Particle(object):
 
 #function to handle recieving information from the server
 def recieve():
-	global m, team, turn, not_team, dice_color, board2_o, board1_o, dice, host, port, go, running_online, direct
+	global m, team, turn, not_team, dice_color, board2_o, board1_o, dice, host, port, go, running_online, direct, direct_id
 	get_team = True
 	while recieving:
 		try:
@@ -225,6 +225,10 @@ def recieve():
 				elif temp[0] == '1':
 					board2_o[int(temp[1]) - 1].change_value(int(temp[2]))
 				pop.play()
+
+			if m[:3] == 'dir':
+				direct_id = m
+				print(direct_id)
 
 			#updating the dice of the other player
 			if m[0] == 'd' and m[1] != 'i' and m[1] != 'c':
@@ -496,6 +500,11 @@ def online():
 		screen.fill((255, 255, 255))
 		t_width, t_height = dice_font.size('WAITING FOR PLAYER 2')
 		screen.blit((dice_font.render(f'WAITING FOR PLAYER 2', True, (0, 0, 0))), [width / 2 - t_width / 2, height / 3 - t_height / 2]) # turn into width
+		
+		if direct:
+			t_width, t_height = dice_font.size(f'YOUR ID IS: {direct_id[3:]}')
+			screen.blit((dice_font.render(f'YOUR ID IS: {direct_id[3:]}', True, (0, 0, 0))), [width / 2 - t_width / 2, height / 1.5 - t_height / 2]) # turn into width
+			
 		img_copy = pygame.transform.rotate(loading_icon, angle)
 		screen.blit(img_copy, (width / 2 - img_copy.get_width() / 2, height / 2 - img_copy.get_height() / 2))
 		angle += 3
