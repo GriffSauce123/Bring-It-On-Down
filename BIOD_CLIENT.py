@@ -4,14 +4,18 @@
 
 import random, sys, pygame, time, socket, threading, os
 
-# -------------------- THINGS TO BE DEALT WITH -------------------- #
+# ---------------------- THINGS TO BE DEALT WITH ---------------------- #
 #
-# option to play multiplayer or singleplayer
-# make server not use a seperate thread for every 2 users :(
-# waiting screen for connection looks like dick
-# dissconection through crash / forcefull end detection
-# Make it look better make logos, banners, sprites, 
-# save states, stats and such
+# CREATE DIRECT CONNECT MATCHMAKING
+#
+#
+# REBUILD SERVER TO USE FEWER PORTS
+# ADD HEARTBEAT DISCONNECTION CHECK
+# REPLACE PYGAME POLYGONS WITH IMAGES / SPRITES
+# ADD SAVE / LOAD GAME
+# ADD USER STATS: # of wins, # of losses, win/loss ratio, avg moves, game length
+# MAKE CODE MORE EFFICIENT, MORE READABLE, FEWER REDUNDANT LINES
+# ENCRYPT NETWORK TRAFFIC TO PREVENT CHEATING / SPOOFING
 #
 # --------------------------------------------------------------------- #
 
@@ -23,14 +27,16 @@ class Button(object):
 		self.text = text.upper()
 		self.font = font
 		
-		#so the text renders properly
+		#gets the size of the text to be rendered
 		self.text_width, self.text_height = self.font.size(self.text)
+		#adds some padding to the button
 		self.size = [self.text_width + width / 19.2, self.text_height + width / 48]
-		print(self.text, self.size[1])
+		#if it is a big button, the size is the same
 		if self.font == dice_font:
 			self.size[0] = width / 2.8
+		#print(f'BUTTON TEXT: {self.text} BUTTON SIZE: {self.size}')
 
-		#to center things properly
+		#setting the specified render point to the center of the button
 		self.padding = (self.size[0] - self.text_width) / 2
 		self.render_pos = (self.pos[0] - self.size[0] / 2, self.pos[1] - self.size[1] / 2)
 
@@ -39,16 +45,16 @@ class Button(object):
 
 	def function(self):
 		if self.rect.collidepoint(pygame.mouse.get_pos()):
-			#pop.play()
 			self.action()
 
 	#drawing screen objects
 	def draw(self):
 		pygame.draw.rect(screen, (255,255,255), self.rect, 0, border_radius = 1000)
 		pygame.draw.rect(screen, self.color, self.rect, round(width / 384), border_radius = 1000)
+		#highlighting the button if it is hovered on
 		if self.rect.collidepoint(pygame.mouse.get_pos()):
 			pygame.draw.rect(screen, dice_color, self.rect, round(width / 384), border_radius = 1000)
-		
+		#rendering the text on the button
 		screen.blit((self.font.render(str(self.text), True, self.color)), (self.render_pos[0] + self.padding, self.render_pos[1] + width / 80))
 
 # ------------------------------------------------------------------------------------------------------------------------------------------ #
@@ -62,31 +68,32 @@ class Segment(object):
 		self.stat = 0
 		self.board = board
 		self.color = (0, 0, 0)
+		
 		#setting colors based on the team provided
 		if self.team == -1:
 			self.color = (255, 50, 50)
 		elif self.team == 1:
 			self.color = (50, 50, 255)
 
-		#pygame Rect object for player interactions
+		#pygame Rect object for click detections
 		self.rect = pygame.Rect(self.pos[0] - self.rad, self.pos[1] - self.rad - (width / 32) - self.rad * self.board, self.rad * 2, self.rad * 4)
 
-		#pygame surface to render the num on
+		#pygame surface to render the numbbers on
 		self.text_s = font.render(str(self.num), True, self.color)
+		#getting the size of the text in order to center it
 		self.text_width, self.text_height = font.size(str(self.num))
 
 	def change_value(self, value):
 		self.stat = value
 
 	def draw(self):
-
 		#highlighting playable spaces
 		if highlight:
-		 if self.num in dice or self.num == dice[0] + dice[1]:
+			if self.num in dice or self.num == dice[0] + dice[1]:
 				pygame.draw.rect(screen, 'lime', [self.pos[0] - self.rad - round(width / 160), self.pos[1] - self.rad - round(height / 15) - self.rad * self.board, self.rad * 2 + round(width / 80), self.rad * 4 + round(width / 80)], round(width / 256), border_radius = 1000)
 				pygame.draw.circle(screen, 'lime', [self.pos[0], self.pos[1] - round(width / 8) * self.board], self.rad + round(width / 160), round(width / 256))
 		
-		#outline
+		#outline of the segment
 		pygame.draw.rect(screen, self.color, self.rect, round(width / 160), border_radius = 1000)
 		pygame.draw.rect(screen, (0,0,0), [self.pos[0] - self.rad - round(width / 320), self.pos[1] - self.rad - round(width / 29) - self.rad * self.board, self.rad * 2 + round(width / 160), self.rad * 4 + round(width / 160)], round(width / 320), border_radius = 1000)
 
@@ -111,7 +118,7 @@ class Segment(object):
 				if round(dice[0]+dice[1]) == round(self.num):
 					dice = [0,0]
 
-		#updating stat of pieces
+		#updating stat of pieces (if it is allowed)
 		if self.num in dice or self.num == (dice[0] + dice[1]):
 			if self.stat == 0:
 				
@@ -141,6 +148,7 @@ class Segment(object):
 
 # ------------------------------------------------------------------------------------------------------------------------------------------ #
 
+#Only used when a player wins so far.
 class Particle(object):
 	def __init__(self, rad, color, x, y, x_vel, y_vel, particles):
 		self.rad = rad
@@ -161,23 +169,24 @@ class Particle(object):
 
 # ------------------------------------------------------------------------------------------------------------------------------------------ #
 
+#function to handle recieving information from the server
 def recieve():
-	global m, team, turn, not_team, dice_color, board2_o, board1_o, dice, host, port, go, running_online
+	global m, team, turn, not_team, dice_color, board2_o, board1_o, dice, host, port, go, running_online, direct
 	get_team = True
-	print('[ RECIEVING ]')
 	while recieving:
 		try:
 			message = client.recvfrom(64)
 			m = message[0].decode()
-			print(f'\nMESSAGE: {m}\n')
-
+			#print(f'\nMESSAGE: {m}\n')
+			#this is a game server assignment message ex: (111.111.111.111|10002)
 			if '|' in m:
 				host = m.split('|')[0]
 				port = int(m.split('|')[1])
 
-				#requesting the team variable:
+				#requesting the team variable after getting the game server
 				send_server('t')
 
+			#getting the team variable
 			if m == '-1' or m == '1':
 				if get_team:
 					team = int(m)
@@ -187,11 +196,13 @@ def recieve():
 						not_team = 1
 					print(f'GOT TEAM: {team}')
 					get_team = False
-		 
+			
+			#Once 2 players connect to the server, recieve "go" message telling the game to begin
 			if m == 'go':
 				print('GO RECIEVED')
 				go = True
 
+			#changeing whos turn it is
 			if m == 'tu':
 				print(f'RECIEVED TURN')  
 				
@@ -205,7 +216,7 @@ def recieve():
 				elif turn % 2 != 1:
 					dice_color = (100, 100, 255)
 
-			#if there is a board status update
+			#if there is a board status update (1.5.2) -> the 5 segment of team one is status 2
 			if '.' in m and '|' not in m:
 				print(f'BOARD UPDATE: {m}')
 				temp = m.split('.')
@@ -215,24 +226,28 @@ def recieve():
 					board2_o[int(temp[1]) - 1].change_value(int(temp[2]))
 				pop.play()
 
-			if m[0] == 'd':
+			#updating the dice of the other player
+			if m[0] == 'd' and m[1] != 'i' and m[1] != 'c':
 				print(f'DICE: {m}')
 				dice = m[-3:].split(' ')
 				print(f'DICE1: {dice}')
 				dice[0], dice[1] = round(dice[0]), round(dice[1])
 				pop.play()
 
-			if 'dc' in m:
-				print('CLIENT 2 DISCONNECTED, SERVER SHUTTING DOWN')
+			#disconnect message
+			if m == 'dc':
+				print('CLIENT 2 DISCONNECTED, GAME SHUTTING DOWN')
 				running_online = False
-				go = True
-				run_menu()
+				direct = False
+				go = False
+				#recieving = False
+				pause()
+				#run_menu()
 
 
 			m = ''
 		except Exception as e:
 			print(e)
-	print('[ NO LONGER RECIEVING ]')
 
 # ------------------------------------------------------------------------------------------------------------------------------------------ #
 
@@ -413,8 +428,15 @@ def offline():
 
 # ------------------------------------------------------------------------------------------------------------------------------------------ #
 
+def direct_online():
+	global direct_id, direct
+	direct = True
+	online()
+
+# ------------------------------------------------------------------------------------------------------------------------------------------ #
+
 def online():
-	global dice, turn, running_online, board1_o, board2_o, dice_color, recieving, client, server_host, port, host, team, m, go
+	global dice, turn, running_online, board1_o, board2_o, dice_color, recieving, client, server_host, port, host, team, m, go, text, direct_id
 	
 	#initializing the network to send and recieve data
 	host = str((([ip for ip in socket.gethostbyname_ex(socket.gethostname())[2] if not ip.startswith("127.")] or [[(s.connect(("8.8.8.8", 53)), s.getsockname()[0], s.close()) for s in [socket.socket(socket.AF_INET, socket.SOCK_DGRAM)]][0][1]]) + ["no IP found"])[0])
@@ -437,7 +459,10 @@ def online():
 	t1.daemon = True
 	t1.start()
 
-	send_server('R')
+	if not direct:
+		send_server('R')
+	elif direct:
+		send_server(direct_id)
 
 	pop.play()
 
@@ -574,10 +599,6 @@ def online():
 		dice_button.draw()
 		turn_over.draw()
 				
-		#Draws lines to center things
-		#pygame.draw.line(screen, (0, 0, 0), [width/2,0], [width/2,height], 1)
-		#pygame.draw.line(screen, (0, 0, 0), [0,height/2], [width,height/2], 1)
-		
 		# refreshes the display
 		pygame.display.flip()
 		
@@ -608,13 +629,20 @@ def button_quit():
 # ------------------------------------------------------------------------------------------------------------------------------------------ #
 
 def run_menu():
-	global running_online, highlight, quit_button, dice_color, recieving, client, menu_button
+	global running_online, highlight, quit_button, dice_color, recieving, client, menu_button, direct_id, text, direct
 	pop.play()
 	running_online = False
 	running = False
 	menu = True
 	recieving = False
-	
+	text = ''
+	active = False
+	color_active = (0, 0, 0)
+	color_inactive = (150, 150, 150)
+	color = color_inactive
+	text = ''
+	direct = False
+
 	send_server('dc')
 	try:
 		client.close()
@@ -629,9 +657,10 @@ def run_menu():
 	
 	game = Button((0,0,0), (width / 4, height * 0.4),  online, 'Online Game', dice_font)
 	game_offline = Button((0,0,0), (width / 4, height * 0.55 ), offline, 'Local Game', dice_font)
-	direct_connect = Button((0,0,0), (width / 4, height * 0.7 ), online, 'Connect', dice_font)
+	direct_connect = Button((0,0,0), (width / 4, height * 0.7 ), direct_online, 'Connect', dice_font)
 	highlights = Button((0, 0, 0), (width / 4, height * 0.25), light, 'Highlights     ', dice_font) # turn into height
-	
+	input_box = pygame.Rect(width / 4 - width / 5.6, height * .85, width / 2.8, dice_font.size(text)[1] + width / 48)
+
 	while menu and not running_online:
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
@@ -644,6 +673,21 @@ def run_menu():
 				quit_button.function()
 				direct_connect.function()
 
+				if input_box.collidepoint(event.pos):
+					# Toggle the active variable.
+					active = not active
+				else:
+					active = False
+				# Change the current color of the input box.
+				color = color_active if active else color_inactive
+			
+			if event.type == pygame.KEYDOWN:
+				if active:
+					if event.key == pygame.K_BACKSPACE:
+						text = text[:-1]
+					elif event.unicode.isdigit() and len(text) < 5:
+						text += event.unicode
+						direct_id = 'dir' + text
 		# background
 		screen.fill('white')
 		screen.blit(icon, (width * 0.7 - icon.get_width() / 2, height / 2 - icon.get_height() / 2))
@@ -657,6 +701,12 @@ def run_menu():
 		if highlight:
 			pygame.draw.circle(screen, 'lime', (width / 4 + round(height / 4), height * 0.25), round(height / 24), 0) # turn into width
 		pygame.draw.circle(screen, 'black', (width / 4 + round(height / 4), height * 0.25), round(height / 24), round(width / 320))
+
+		txt_surface = dice_font.render(text, True, color)
+		# Blit the text.
+		screen.blit(txt_surface, (input_box.x + input_box.w / 2 - dice_font.size(text)[0] / 2, input_box.y + width / 80))
+		# Blit the input_box rect
+		pygame.draw.rect(screen, color, input_box, int(width / 384), border_radius=1000)
 
 
 		pygame.display.flip()
@@ -788,6 +838,7 @@ if __name__ == '__main__':
 	running = False
 	highlight = False
 	dice = [0,0]
+	direct_id = 'dir'
  
 # ------------------------------------------------------------------------------------------------------------------------------------------ #
 
