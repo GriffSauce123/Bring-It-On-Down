@@ -9,6 +9,8 @@ import threading
 
 servers = []
 counter = 1
+direct_connections = []
+direct_id = 1111
 
 class Server(object):
 	def __init__(self, ip, port):
@@ -21,7 +23,7 @@ class Server(object):
 		
 	def recieve(self):
 		print('RECIEVING\n')
-		global servers, counter
+		global servers, counter, direct_id, direct_connections
 		while True:
 			try:
 				self.message, self.addr = self.server.recvfrom(64)
@@ -29,6 +31,10 @@ class Server(object):
 
 				if self.data == 'dc':
 					self.clients.remove(self.addr)
+					if any(self.addr[0] in sl for sl in direct_connections):
+						for i in range(len(direct_connections)):
+							if self.addr[0] in direct_connections[i]:
+								del direct_connections[i]
 					print(f'[ {self.addr} DISCONNECTED ]')
 					if len(self.clients) == 2:
 						self.server.sendto(self.message, self.other)
@@ -76,43 +82,46 @@ class Server(object):
 				print(e)
 
 def main():
-	global servers, counter
+	global servers, counter, direct_id, direct_connections
 	main_server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 	ip = '192.168.0.247' # IP OF THE COMPUTER HOSTING THE SERVER
 	port = 10003 # A CLEAR PORT TO USE
 	main_server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 	main_server.bind((ip, port))
-	direct_id = 1111
-	direct_id = 'dir' + str(direct_id)
-	direct_connections = []
 
 	while True:
 		try:
 			message, addr = main_server.recvfrom(64)
 			data = message.decode()			
 			print(f'Counter: {counter}\nServers: {len(servers)}')
-
-			#this is a direct connect request
-			if data[:3] == 'dir':
-				print(f'got direct request from: {addr}')
+			print(data)
+			#request for direct connection
+			if 'dir' in data:
+				#sending an id to the user
 				if len(data) == 3:
-					main_server.sendto(direct_id.encode(), addr)
-					addr = [addr[0], addr[1], direct_id]
-					direct_connections.append(addr)
-				elif len(data) > 3:
-					# if the user with that id is waiting, add this connection and start the game
-					if any(data[3:] in sl[2] for sl in direct_connections):
-						indecies = [(i, el.index(data[3:])) for i, el in enumerate(direct_connections) if 2 in el] # (outer index, inner index)
-						other = direct_connections[indecies[0]][:2]
-						s = len(servers)
-						s1 = Server('192.168.0.247', port + 1)
-						servers.append(s1)
-						thread = threading.Thread(target=servers[s].recieve)
-						thread.daemon = True
-						thread.start()
-						main_server.sendto((str(servers[s].ip) + '|' + str(servers[s].port)).encode(), addr)
-						main_server.sendto((str(servers[s].ip) + '|' + str(servers[s].port)).encode(), other)
+					main_server.sendto(str(direct_id).encode(), addr)
+					direct_connections.append([addr[0], addr[1], direct_id])
+					direct_id += 1
+					print(direct_connections)
 
+					s = len(servers)
+					s1 = Server('192.168.0.247', port + 1)
+					servers.append(s1)
+					thread = threading.Thread(target=servers[s].recieve)
+					thread.daemon = True
+					thread.start()
+					main_server.sendto((str(servers[s].ip) + '|' + str(servers[s].port)).encode(), addr)
+					counter += 1
+
+				elif len(data) > 3:
+					#check if id match in direct_connections
+					if any(data[3:] in sl for sl in direct_connections):
+						for i in range(len(direct_connections)):
+							if data[3:] in direct_connections[i]:
+								index = i
+						main_server.sendto((str(servers[s].ip) + '|' + str(servers[s].port)).encode(), (direct_connections[index][0], direct_connections[index][1]))
+					else:
+						main_server.sendto('dc'.encode(), addr)
 			elif counter % 2 == 0 and len(servers) > 0:
 				#give the current server info (string message will be like '111.111.111.111|4435')
 				s = len(servers)
@@ -135,7 +144,5 @@ def main():
 			print(e)
 			print(f'DISCONNECTED: {addr}')
 
-
-	
 if __name__ == '__main__':
 	main()
