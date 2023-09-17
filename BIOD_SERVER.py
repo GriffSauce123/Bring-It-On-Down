@@ -102,7 +102,7 @@ def main():
 				elif len(message) > 3:
 					# if the user with that id is waiting, add this connection and start the game
 					if any(message[3:] in sl[2] for sl in direct_connections):
-						indecies = (i, el.index(message[3:])) for i, el in enumerate(direct_connections) if 2 in el # (outer index, inner index)
+						indecies = [(i, el.index(message[3:])) for i, el in enumerate(direct_connections) if 2 in el] # (outer index, inner index)
 						other = direct_connections[indecies[0]][:2]
 						s = len(servers)
 						s1 = Server('192.168.0.247', port + 1)
