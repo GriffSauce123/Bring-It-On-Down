@@ -94,12 +94,13 @@ def main():
 			message, addr = main_server.recvfrom(64)
 			data = message.decode()			
 			print(f'Counter: {counter}\nServers: {len(servers)}')
-			print(data)
 			#request for direct connection
 			if 'dir' in data:
 				#sending an id to the user
 				if len(data) == 3:
-					main_server.sendto(str(direct_id).encode(), addr)
+					temp = 'dir' + str(direct_id)
+					main_server.sendto(str(temp).encode(), addr)
+					print(f'DIRECT: {temp}')
 					direct_connections.append([addr[0], addr[1], direct_id])
 					direct_id += 1
 					print(direct_connections)
