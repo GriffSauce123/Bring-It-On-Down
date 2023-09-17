@@ -1,6 +1,8 @@
+# So Far So Good
+
 # make server not use a seperate thread for every 2 users :(
-# ideally there is one listener thread, and a broadcast thread for every game (clients / 2)
-# Alpha 0.8 compatable
+# make waiting for connection screen work
+#ideally there is one listener thread, and a broadcast thread for every game (clients / 2)
 
 import socket
 import threading
@@ -22,7 +24,7 @@ class Server(object):
 		global servers, counter
 		while True:
 			try:
-				self.message, self.addr = self.server.recvfrom(1024)
+				self.message, self.addr = self.server.recvfrom(64)
 				self.data = self.message.decode()
 
 				if self.data == 'dc':
@@ -80,14 +82,38 @@ def main():
 	port = 10003 # A CLEAR PORT TO USE
 	main_server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 	main_server.bind((ip, port))
+	direct_id = 1111
+	direct_id = 'dir' + str(direct_id)
+	direct_connections = []
 
 	while True:
 		try:
-			message, addr = main_server.recvfrom(1024)
+			message, addr = main_server.recvfrom(64)
 			data = message.decode()			
 			print(f'Counter: {counter}\nServers: {len(servers)}')
 
-			if counter % 2 == 0 and len(servers) > 0:
+			#this is a direct connect request
+			if message[:3] == 'dir':
+				print(f'got direct request from: {addr}')
+				if len(message) == 3:
+					main_server.sendto(direct_id.encode(), addr)
+					addr = [addr[0], addr[1], direct_id]
+					direct_connections.append(addr)
+				elif len(message) > 3:
+					# if the user with that id is waiting, add this connection and start the game
+					if any(message[3:] in sl[2] for sl in direct_connections):
+						indecies = (i, el.index(message[3:])) for i, el in enumerate(direct_connections) if 2 in el # (outer index, inner index)
+						other = direct_connections[indecies[0]][:2]
+						s = len(servers)
+						s1 = Server('192.168.0.247', port + 1)
+						servers.append(s1)
+						thread = threading.Thread(target=servers[s].recieve)
+						thread.daemon = True
+						thread.start()
+						main_server.sendto((str(servers[s].ip) + '|' + str(servers[s].port)).encode(), addr)
+						main_server.sendto((str(servers[s].ip) + '|' + str(servers[s].port)).encode(), other)
+
+			elif counter % 2 == 0 and len(servers) > 0:
 				#give the current server info (string message will be like '111.111.111.111|4435')
 				s = len(servers)
 				main_server.sendto((str(servers[s - 1].ip) + '|' + str(servers[s - 1].port)).encode(), addr)
