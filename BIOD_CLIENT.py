@@ -177,7 +177,7 @@ def recieve():
 		try:
 			message = client.recvfrom(64)
 			m = message[0].decode()
-			#print(f'\nMESSAGE: {m}\n')
+			print(f'\nMESSAGE: {m}\n')
 			#this is a game server assignment message ex: (111.111.111.111|10002)
 			if '|' in m:
 				host = m.split('|')[0]
@@ -235,7 +235,7 @@ def recieve():
 				print(f'DICE: {m}')
 				dice = m[-3:].split(' ')
 				print(f'DICE1: {dice}')
-				dice[0], dice[1] = round(dice[0]), round(dice[1])
+				dice[0], dice[1] = int(dice[0]), int(dice[1])
 				pop.play()
 
 			#disconnect message
@@ -245,8 +245,7 @@ def recieve():
 				direct = False
 				go = False
 				#recieving = False
-				pause()
-				#run_menu()
+				run_menu()
 
 
 			m = ''
@@ -446,7 +445,7 @@ def online():
 	host = str((([ip for ip in socket.gethostbyname_ex(socket.gethostname())[2] if not ip.startswith("127.")] or [[(s.connect(("8.8.8.8", 53)), s.getsockname()[0], s.close()) for s in [socket.socket(socket.AF_INET, socket.SOCK_DGRAM)]][0][1]]) + ["no IP found"])[0])
 	#host = '192.168.0.107' # THIS IS THE CLIENT'S IP ADDRESS
 	server_host = '73.159.244.185' # THIS IS THE SERVER IP ADDRESS
-	port = 10003
+	port = 10000
 
 	recieving = True
 
@@ -474,12 +473,10 @@ def online():
 
 	#making sure the game only starts once team is given from the server
 	angle = 0
-	while team == 0:
-		continue
 
 	#WAITING SCREEN WHILE SERVER LOOKS FOR PLAYER 2
 	print(f'GO STATUS: {go}')
-	while not go:
+	while not go or team == 0:
 		
 		if go == True:
 			break
@@ -638,8 +635,9 @@ def button_quit():
 # ------------------------------------------------------------------------------------------------------------------------------------------ #
 
 def run_menu():
-	global running_online, highlight, quit_button, dice_color, recieving, client, menu_button, direct_id, text, direct
+	global running_online, highlight, quit_button, dice_color, recieving, client, menu_button, direct_id, text, direct, team
 	pop.play()
+	team = -1
 	running_online = False
 	running = False
 	menu = True
