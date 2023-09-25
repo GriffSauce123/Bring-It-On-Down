@@ -1,8 +1,8 @@
-# So Far So Good
-
 # make server not use a seperate thread for every 2 users :(
-# make waiting for connection screen work
-#ideally there is one listener thread, and a broadcast thread for every game (clients / 2)
+# MAKE DIRECT CONNECT WORK
+# ideally there is one listener thread, and a broadcast thread for every game (clients / 2)
+
+# Sept 24 2023
 
 import socket
 import threading
@@ -32,17 +32,22 @@ class Server(object):
 				self.data = self.message.decode()
 
 				if self.data == 'dc':
-					matchmaking -= len(self.clients)
+					if not any(self.addr[0] in sl for sl in direct_connections):
+						matchmaking -= len(self.clients)
+					
 					if any(self.addr[0] in sl for sl in direct_connections):
 						for i in range(len(direct_connections)):
 							if self.addr[0] in direct_connections[i]:
 								del direct_connections[i]
 					
-					print(f'[ {self.port} DISCONNECTED ]')
+					
 					if len(self.clients) == 2:
 						self.server.sendto(self.message, self.other)
 					servers.remove(self)
 					open_ports.append(self.port)
+					print(f'[ {self.port} DISCONNECTED ]')
+					print(matchmaking)
+					print(direct_connections)
 					break
 
 				self.other = []
@@ -93,23 +98,22 @@ def main():
 		try:
 			message, addr = main_server.recvfrom(64)
 			data = message.decode()			
-			print(f'matchmaking #: {matchmaking}\nServers: {servers}')
+			if data != 'G':
+				print(f'DATA: {data} FROM: {addr}')
+				#print(f'MATCHMAKING PLAYERS: {matchmaking - 1}\nSERVERS: {servers}')
 			
 			# --------------------------------------------------------------------------------------------------------- #
 			if 'dir' in data: #request for direct connection
 				#sending an id to the user
 				if len(data) == 3:
-					temp = 'dir' + str(direct_id)
+					temp = 'dir' + str(direct_id)	
 					main_server.sendto(str(temp).encode(), addr)
 					direct_connections.append([addr[0], addr[1], direct_id])
 					direct_id += 1
-					#print(direct_connections)
 
 					s = len(servers)
 					s1 = Server('192.168.0.247', open_ports[0])
-					print(open_ports[0])
 					del open_ports[0]
-					print(open_ports[0])
 
 					servers.append(s1)
 					thread = threading.Thread(target=servers[s].recieve)
@@ -119,20 +123,21 @@ def main():
 
 				if len(data) > 3:
 					#check if id match in direct_connections
-					print(f'DATA: {data[3:]}\nCHECK: {any(int(data[3:]) in sl for sl in direct_connections)}\nDirect Conn: {direct_connections}')
+					#print(f'DATA: {data[3:]}\nCHECK: {any(int(data[3:]) in sl for sl in direct_connections)}\nDirect Conn: {direct_connections}')
 					if any(int(data[3:]) in sl for sl in direct_connections):
-						print('ID IN CONNECTIONS')
-						print(f'ID: {data[:3]}\nConnections: {direct_connections}')
+						#print('ID IN CONNECTIONS')
+						#print(f'ID: {data[3:]}\nConnections: {direct_connections}')
 						for i in range(len(direct_connections)):
 							if data[3:] in direct_connections[i]:
 								index = i
+						print(str(servers[s].ip) + '|' + str(servers[s].port))
 						main_server.sendto((str(servers[s].ip) + '|' + str(servers[s].port)).encode(), (direct_connections[index][0], direct_connections[index][1]))
 					else:
 						main_server.sendto('dc'.encode(), addr)
 						
 			# --------------------------------------------------------------------------------------------------------- #
 			
-			if 'G' != data:
+			if 'G' != data and 'dir' not in data:
 				if matchmaking % 2 == 0 and len(servers) > 0:
 					#give the current server info (string message will be like '111.111.111.111|4435')
 					s = len(servers)
