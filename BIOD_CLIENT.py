@@ -7,6 +7,7 @@ import random, sys, pygame, time, socket, threading, os
 # ---------------------- THINGS TO BE DEALT WITH ---------------------- #
 #
 # ADD SAFE SPACE CLICKBOX
+# MAKE DIRECT CONNECT WORK
 # 
 # REBUILD SERVER TO USE FEWER PORTS
 # ADD HEARTBEAT DISCONNECTION CHECK
@@ -232,7 +233,7 @@ def recieve():
 
 			#disconnection
 			if m == 'dc':
-				print('DISCONNECTED')
+				print('DISCONNECTED FROM SERVER')
 				running_online = False
 				direct = False
 				go = False
@@ -247,7 +248,8 @@ def recieve():
 def send_server(data):
 	try:
 		client.sendto(str(data).encode(), (server_host, port))
-		print(f'SENT SERVER: {str(data).encode()}')
+		if data != 'G':
+			print(f'SENT SERVER: {str(data).encode()}')
 	except Exception as e:
 		print(e)
 
@@ -473,7 +475,8 @@ def online():
 		
 		if go == True:
 			break
-		#to update the server
+		
+		#to update the server - This is a very bad implementation of this
 		send_server('G')
 
 		for event in pygame.event.get():
@@ -714,8 +717,6 @@ def run_menu():
 		pygame.display.flip()
 		clock.tick(240)
 
-	button_quit()
-
 # ------------------------------------------------------------------------------------------------------------------------------------------ #
 
 def pause():
@@ -766,6 +767,7 @@ def win():
 				button_quit()
 			
 			if event.type == pygame.KEYDOWN:
+				break
 				pause()
 		
 		screen.fill('white')
