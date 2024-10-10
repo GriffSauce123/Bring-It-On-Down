@@ -25,10 +25,21 @@ function make_safe(element) {
 }
 
 function nextturn() {
+
+    //push up rings to safe space for other players
+
     if (gameboard.style.rotate == "180deg") {
         gameboard.style.rotate = "0deg"
     }
     else {
         gameboard.style.rotate = "180deg"
     }
+}
+
+function roll_dice() {
+
+    //check if allowed
+
+    document.getElementById("d1").innerHTML = Math.floor(Math.random() * (7 - 1) ) + 1
+    document.getElementById("d2").innerHTML = Math.floor(Math.random() * (7 - 1) ) + 1
 }

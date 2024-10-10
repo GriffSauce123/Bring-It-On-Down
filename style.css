@@ -31,7 +31,7 @@ body {
     height: 10vw;
     border-radius: 999px;
     border: solid .5vw black;
-    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
     position: relative;
     margin: 0.4vw;
     background: var(--main);
@@ -53,7 +53,7 @@ body {
     height: 5vw;
     border: solid .5vw black;
     border-radius: 999px;
-    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
     position: absolute;
     left: -0.5vw;
     top: -7vw;
@@ -91,7 +91,7 @@ body {
 
 .board-1, .board-2 {
     display: flex;
-    padding-top: 7vw;
+    padding-top: 12.5vw;
 }
 
 .board-2 {
@@ -111,5 +111,34 @@ body {
     bottom: 20px;
     right: 20px;
     padding: 10px 20px;
+    border: solid 2px black;
+    border-radius: 12.5px;
+}
+
+.dice-area {
+    display: flex;
+    position: absolute;
+    width: 20vw;
+    height: 10vw;
+    background: blanchedalmond;
     border: solid 4px black;
+    border-radius: 2vw;
+    bottom: calc(50% - 5vw);
+    left: calc(50% - 10vw);
+}
+
+.dice-area * {
+    margin: auto;
+}
+
+.roll-button {
+    padding: 10px 20px;
+    border: solid 2px black;
+    border-radius: 12.5px;
+    background-color: #FAF7ED;
+    z-index: 9;
+}
+
+a:hover {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
 }
