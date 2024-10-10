@@ -1,7 +1,7 @@
 * {
     padding: 0;
     margin: 0;
-    transition: .2s !important;
+    transition: .2s ease;
     font-size: 20px;
     font-family: sans-serif;
     text-decoration: none;
@@ -23,6 +23,7 @@ body {
 
 .game-board {
     margin: auto;
+    transition: 0.5s ease-in-out;
 
 }
 
@@ -85,7 +86,7 @@ body {
     border: solid 1vw var(--main);
     position: absolute;
     bottom: 0;
-    right: 0;
+    right: .08vw;
 
 }
 
