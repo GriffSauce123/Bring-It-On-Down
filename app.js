@@ -1,3 +1,19 @@
+/* 
+TODO:
+Begin game screen
+check for a win
+win screen
+
+settings
+- easy mode
+- automatic turn change
+- automatic roll
+
+hook to realtime db firebase for kahoot style multiplayer
+*/
+
+
+
 const gameboard = document.querySelector(".game-board")
 
 const player1_segs = document.querySelector(".board-2")
@@ -46,6 +62,22 @@ function changestate(element) {
                 if (element.parentElement.parentElement.id == "board-1") {current_moves1.push(temp)}
                 else if (element.parentElement.parentElement.id == "board-2") {current_moves2.push(temp)}
 
+                 //check for win of game
+                 let win = true
+                 for (let seg of element.parentElement.parentElement.children) {
+                     if (!(seg.querySelector(".ring").style.bottom == "5.1vw" || seg.querySelector(".ring").style.bottom == "11.6vw")) {
+                         win = false
+                         break
+                     }
+                 }
+                 if (win) {
+                     //do the winning things
+                     //check which team won
+                     //coneftti or something
+                     //show number of moves, number of rolls, etc
+                     //timer?
+                 }
+
                 //resetting the dice
                 if (element.parentElement.id.includes(Math.round(d1.innerHTML) + Math.round(d2.innerHTML))) {d1.innerHTML = 0; d2.innerHTML = 0}
                 else if (element.parentElement.id.includes(d1.innerHTML)) {d1.innerHTML = 0}
@@ -63,9 +95,6 @@ function nextturn() {
 
     d1.innerHTML = 0
     d2.innerHTML = 0
-
-    console.log(current_moves1)
-    console.log(current_moves2)
 
     turn = !turn
     num_turns ++

@@ -85,7 +85,7 @@ body {
     border-radius: 999px;
     border: solid 1vw var(--main);
     position: absolute;
-    bottom: 0;
+    bottom: 0vw;
     right: .08vw;
 
 }
