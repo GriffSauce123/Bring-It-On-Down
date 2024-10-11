@@ -21,6 +21,11 @@ body {
     min-height: 100vh;
 }
 
+h1 {
+    font-size: 64px;
+    text-align: center;
+}
+
 .game-board {
     margin: auto;
     transition: 0.5s ease-in-out;
@@ -107,13 +112,18 @@ body {
     background-color: var(--other);
 }
 
-.turn-button {
+.turn-button, .exit-game {
     position: absolute;
     bottom: 20px;
     right: 20px;
     padding: 10px 20px;
     border: solid 2px black;
     border-radius: 12.5px;
+}
+
+.exit-game {
+    bottom: calc(100% - 70px);
+    right: calc(100% - 100px);
 }
 
 .dice-area {
@@ -142,4 +152,34 @@ body {
 
 a:hover {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.splashpage {
+    background: white;
+    position: fixed;
+    z-index: 10;
+    width: 100vw;
+    min-height: 100vh;
+    display: flex;
+}
+
+.splashpage .container {
+    margin: auto;
+}
+
+.home-btn {
+    display: block;
+    padding: 10px 20px;
+    border: solid 2px black;
+    border-radius: 12.5px;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.img-container {
+    display: flex;
+}
+
+.img-container img {
+    margin: auto;
 }

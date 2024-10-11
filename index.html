@@ -4,10 +4,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bring It On Down</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="shortcut icon" type="image/png" href="images/icon-small.png">
 </head>
 <body>
 
+    <section class="splashpage">
+        <div class="container">
+            <h1>Bring It On Down</h1>
+            <div class="img-container"><img src="images/icon-512.jpg"></div>
+            <div>
+                <a id="startlocal" href="#" class="home-btn">Local Game</a>
+                <a href="#" class="home-btn">Create Lobby</a>
+                <a href="#" class="home-btn">Join Lobby</a>
+            </div>
+        </div>
+    </section>
+
     <a href="#" class="turn-button" onclick="nextturn()">Next Turn</a>
+    <a href="#" class="exit-game" onclick="exit_game()">Exit</a>
+
 
     <div class="dice-area"><div id="d1">0</div><a class="roll-button" onclick="roll_dice()" href="#">Roll</a><div id="d2">0</div></div>
 

@@ -1,8 +1,7 @@
 /* 
 TODO:
-Begin game screen
-check for a win
 win screen
+pause the game
 
 settings
 - easy mode
@@ -12,7 +11,8 @@ settings
 hook to realtime db firebase for kahoot style multiplayer
 */
 
-
+const startlocal = document.getElementById("startlocal")
+const splashpage = document.querySelector(".splashpage")
 
 const gameboard = document.querySelector(".game-board")
 
@@ -27,6 +27,8 @@ let current_moves2 = []
 
 var turn = true //true is player 1, false is player 2
 var num_turns = 0 //number of turns played
+
+startlocal.addEventListener("click", start_local_game)
 
 for (let seg of player1_segs.children) {
     seg.querySelector(".ring").addEventListener("click", () => {changestate(seg.querySelector(".ring"))})
@@ -151,4 +153,22 @@ function roll_dice() {
         d1.innerHTML = Math.floor(Math.random() * (7 - 1) ) + 1
         d2.innerHTML = Math.floor(Math.random() * (7 - 1) ) + 1
     }
+}
+
+function start_local_game() {
+    splashpage.style.display = "none"
+}
+
+function exit_game() {
+    for (let seg of player1_segs.children) {
+        seg.querySelector(".ring").style.bottom = "0vw";
+    }
+    for (let seg of player2_segs.children) {
+        seg.querySelector(".ring").style.bottom = "0vw";
+    }
+    d1.innerHTML = 0
+    d2.innerHTML = 0
+    num_turns = 0
+    turn = true
+    splashpage.style.display = "flex"
 }
