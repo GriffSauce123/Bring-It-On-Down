@@ -192,8 +192,8 @@ a:hover {
     border: solid 2px gray;
     background: whitesmoke;
     margin-bottom: 20px;
-    height: 34px;
+    height: 30px;
     border-radius: 12.5px;
     text-align: center;
-    letter-spacing: 4px;
+    letter-spacing: 6px;
 }
