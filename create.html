@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Co-op Game</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="shortcut icon" type="image/png" href="../images/icon-small.png">
+</head>
+<body>
+    
+    <section class="splashpage">
+        <div class="container">
+            <h1>Create A Co-op Game</h1>
+            <div class="img-container"><img src="../images/icon-512.jpg"></div>
+            <div>
+                <p class="generated-code">••••••</p>
+                <form action="/create" id="create_form">
+                <a id="create-coop" href="#" class="home-btn">Create</a>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <a href="#" class="turn-button" onclick="nextturn()">Next Turn</a>
+    <a href="/" class="exit-game">Exit</a>
+
+
+    <div class="dice-area"><div id="d1">0</div><a class="roll-button" onclick="roll_dice()" href="#">Roll</a><div id="d2">0</div></div>
+
+    <section class="game-board" style="rotate: 0deg;">
+        <section class="board-2" id="board-2">
+            <div class="segment" id="seg_1">
+                <div class="safe-space"><span>1</span></div>
+                <div class="ring"></div>
+            </div>
+            <div class="segment" id="seg_2">
+                <div class="safe-space"><span>2</span></div>
+                <div class="ring"></div>
+            </div>
+            <div class="segment" id="seg_3">
+                <div class="safe-space"><span>3</span></div>
+                <div class="ring"></div>
+            </div>
+            <div class="segment" id="seg_4">
+                <div class="safe-space"><span>4</span></div>
+                <div class="ring"></div>
+            </div>
+            <div class="segment" id="seg_5">
+                <div class="safe-space"><span>5</span></div>
+                <div class="ring"></div>
+            </div>
+            <div class="segment" id="seg_6">
+                <div class="safe-space"><span>6</span></div>
+                <div class="ring"></div>
+            </div>
+            <div class="segment" id="seg_7">
+                <div class="safe-space"><span>7</span></div>
+                <div class="ring"></div>
+            </div>
+            <div class="segment" id="seg_8">
+                <div class="safe-space"><span>8</span></div>
+                <div class="ring"></div>
+            </div>
+            <div class="segment" id="seg_9">
+                <div class="safe-space"><span>9</span></div>
+                <div class="ring"></div>
+            </div>
+            <div class="segment" id="seg_10">
+                <div class="safe-space"><span>10</span></div>
+                <div class="ring"></div>
+            </div>
+        </section>
+
+        <section class="board-1" id="board-1">
+            <div class="segment" id="seg_1">
+                <div class="safe-space"><span>1</span></div>
+                <div class="ring"></div>
+            </div>
+            <div class="segment" id="seg_2">
+                <div class="safe-space"><span>2</span></div>
+                <div class="ring"></div>
+            </div>
+            <div class="segment" id="seg_3">
+                <div class="safe-space"><span>3</span></div>
+                <div class="ring"></div>
+            </div>
+            <div class="segment" id="seg_4">
+                <div class="safe-space"><span>4</span></div>
+                <div class="ring"></div>
+            </div>
+            <div class="segment" id="seg_5">
+                <div class="safe-space"><span>5</span></div>
+                <div class="ring"></div>
+            </div>
+            <div class="segment" id="seg_6">
+                <div class="safe-space"><span>6</span></div>
+                <div class="ring"></div>
+            </div>
+            <div class="segment" id="seg_7">
+                <div class="safe-space"><span>7</span></div>
+                <div class="ring"></div>
+            </div>
+            <div class="segment" id="seg_8">
+                <div class="safe-space"><span>8</span></div>
+                <div class="ring"></div>
+            </div>
+            <div class="segment" id="seg_9">
+                <div class="safe-space"><span>9</span></div>
+                <div class="ring"></div>
+            </div>
+            <div class="segment" id="seg_10">
+                <div class="safe-space"><span>10</span></div>
+                <div class="ring"></div>
+            </div>
+        </section>
+    </section>
+    <script src="../create.js"></script>
+</body>
+</html>

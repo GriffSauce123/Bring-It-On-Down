@@ -1,0 +1,14 @@
+{
+  "name": "bring-it-on-down",
+  "version": "1.0.0",
+  "description": "Inspired By Obsession Board Game",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Adelmann Enterprises",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.1"
+  }
+}
