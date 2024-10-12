@@ -1,0 +1,208 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+* {
+    padding: 0;
+    margin: 0;
+    transition: .2s ease;
+    font-size: 20px;
+    font-family: "Poppins", sans-serif;
+    text-decoration: none;
+    color: black;
+
+}
+
+:root {
+    --main: #3232FF ;
+    --other: #FF3232;
+
+  }  
+
+body {
+    background: #FAF7ED;
+    display: flex;
+    min-height: 100vh;
+}
+
+h1 {
+    font-size: 64px;
+    text-align: center;
+    font-weight: 500;
+}
+
+.game-board {
+    margin: auto;
+    transition: 0.5s ease-in-out;
+
+}
+
+.segment {
+    width: 5vw;
+    height: 10vw;
+    border-radius: 999px;
+    border: solid .5vw black;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    position: relative;
+    margin: 0.4vw;
+    background: var(--main);
+}
+
+.segment::before {
+    position: absolute;
+    content: '';
+    width: 4vw;
+    height: 9vw;
+    border-radius: 999px;
+    border: solid .5vw var(--main);
+    background: white;
+
+}
+
+.safe-space {
+    width: 5vw;
+    height: 5vw;
+    border: solid .5vw black;
+    border-radius: 999px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    position: absolute;
+    left: -0.5vw;
+    top: -7vw;
+    background: var(--main);
+}
+
+.safe-space span {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    padding-top: calc(50% - 12px);
+    text-align: center;  
+}
+
+.safe-space::before {
+    position: absolute;
+    content: '';
+    width: 4.1vw;
+    height: 4.1vw;
+    border-radius: 999px;
+    border: solid .5vw var(--main);
+    background: white;
+}
+
+.ring {
+    width: 3vw;
+    height: 3vw;
+    border-radius: 999px;
+    border: solid 1vw var(--main);
+    position: absolute;
+    bottom: 0vw;
+    right: .08vw;
+
+}
+
+.board-1, .board-2 {
+    display: flex;
+    padding-top: 12.5vw;
+}
+
+.board-2 {
+    rotate: 180deg;
+}
+
+.board-2 .segment::before, .board-2 .safe-space::before, .board-2 .ring {
+    border-color: var(--other);
+}
+
+.board-2 .safe-space, .board-2 .segment {
+    background-color: var(--other);
+}
+
+.turn-button, .exit-game {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    border: solid 2px black;
+    border-radius: 12.5px;
+}
+
+.exit-game {
+    bottom: calc(100% - 70px);
+    right: calc(100% - 100px);
+}
+
+.dice-area {
+    display: flex;
+    position: absolute;
+    width: 20vw;
+    height: 10vw;
+    background: blanchedalmond;
+    border: solid 4px black;
+    border-radius: 2vw;
+    bottom: calc(50% - 5vw);
+    left: calc(50% - 10vw);
+}
+
+.dice-area * {
+    margin: auto;
+}
+
+.roll-button {
+    padding: 10px 20px;
+    border: solid 2px black;
+    border-radius: 12.5px;
+    background-color: #FAF7ED;
+    z-index: 9;
+}
+
+a:hover {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.splashpage {
+    background: white;
+    position: fixed;
+    z-index: 11;
+    width: 100vw;
+    min-height: 100vh;
+    display: flex;
+}
+
+.container {
+    margin: auto;
+}
+
+.win-screen {
+    background: white;
+    position: fixed;
+    z-index: 10;
+    width: 100vw;
+    min-height: 100vh;
+    display: flex;
+}
+
+canvas {
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    overflow-y: hidden;
+    overflow-x: hidden;
+    width: 100%;
+    margin: 0;
+  }
+
+.home-btn {
+    display: block;
+    padding: 10px 20px;
+    border: solid 2px black;
+    border-radius: 12.5px;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.img-container {
+    display: flex;
+}
+
+.img-container img {
+    margin: auto;
+}
