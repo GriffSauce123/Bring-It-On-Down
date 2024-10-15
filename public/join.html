@@ -9,6 +9,19 @@
 </head>
 <body>
     
+    <section class="splashpage">
+        <div class="container">
+            <h1>Join A Co-op Game</h1>
+            <div class="img-container"><img src="../images/icon-512.jpg"></div>
+            <div>
+                <input type="text" class="generated-code" id="code" maxlength="6">••••••</input>
+                <form action="/create" id="create_form">
+                <a id="create-coop" href="#" class="home-btn">Join</a>
+                </form>
+            </div>
+        </div>
+    </section>
+
     <a href="#" class="turn-button" onclick="nextturn()">Next Turn</a>
 
     <div class="dice-area"><div id="d1">0</div><a class="roll-button" onclick="roll_dice()" href="#">Roll</a><div id="d2">0</div></div>

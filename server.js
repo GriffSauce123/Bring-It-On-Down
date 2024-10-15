@@ -1,10 +1,42 @@
-const express = require("express")
-var bodyParser = require('body-parser')
+import express from "express"
+import { createClient } from "@libsql/client";
+import "dotenv/config.js";
+import bodyParser from "body-parser"
 var app = express()
 
-app.use(bodyParser.json());
+/**
+ * SOCKET.IO to manage current games, only use db for saved information lol.
+ * socket id instead of ip addr
+ * authoritative server functions
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ */
 
+
+
+
+app.use(bodyParser.json());
 app.use(express.static('public'))
+
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url)) + "\\public";
+
+//DATABASE THINGS
+const turso = createClient({
+               url: process.env.TURSO_DATABASE_URL,
+    authToken: process.env.TURSO_AUTH_TOKEN,
+  });
+  
+/*
+//getting all current games
+let data = await turso.execute("SELECT * FROM current_games")
+console.log(data)*/
 
 // Homepage
 app.get('/', (req, res) => {
@@ -19,12 +51,19 @@ app.get('/create', (req, res) => {
 //server creating the code and sending to client
 app.post('/create', (req, res) => {
     let code = (Math.random() + 'a').slice(2,8);
+    let player1ip = req.socket.remoteAddress;
+    console.log(player1ip)
+    turso.execute(`INSERT INTO current_games ("code", "player1ip") VALUES (${code}, "${player1ip}");`)
     res.send(code)
 })
 
 app.get('/join', (req, res) => {
-    //get id from get request in url and check database
-    res.sendFile(__dirname + '/join.html')
+    //make sure there is a valid get request
+
+    //check that this is not the one who created the match (set to player2ip)
+    turso.execute(`UPDATE current_games SET player2ip=${req.socket.remoteAddress} WHERE code=${req.query.id}`)
+
+    res.sendFile(__dirname + '/join.html') // add little thing telling user which team they are on, which color
 })
 
 app.post('/join', (req, res) => {

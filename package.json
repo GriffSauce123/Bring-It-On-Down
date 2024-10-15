@@ -1,15 +1,19 @@
 {
   "name": "bring-it-on-down",
+  "type": "module",
   "version": "1.0.0",
   "description": "Inspired By Obsession Board Game",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js --env-file=.env"
   },
   "author": "Adelmann Enterprises",
   "license": "ISC",
   "dependencies": {
+    "@libsql/client": "^0.14.0",
     "body-parser": "^1.20.3",
-    "express": "^4.21.1"
+    "express": "^4.21.1",
+    "socket.io": "^4.8.0"
   }
 }
