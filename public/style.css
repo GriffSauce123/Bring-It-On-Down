@@ -3,7 +3,6 @@
 * {
     padding: 0;
     margin: 0;
-    transition: .2s ease;
     font-size: 20px;
     font-family: "Poppins", sans-serif;
     text-decoration: none;
@@ -95,6 +94,7 @@ h1 {
     position: absolute;
     bottom: 0vw;
     right: .08vw;
+    transition: .2s ease;   
 
 }
 
@@ -155,6 +155,7 @@ h1 {
 
 a:hover {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    transition: .2s ease;
 }
 
 .splashpage {
@@ -196,4 +197,10 @@ a:hover {
     border-radius: 12.5px;
     text-align: center;
     letter-spacing: 6px;
+}
+
+.generated-code:hover, .input:hover, .home-btn:hover {
+    cursor: pointer;
+    transition: .2s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }

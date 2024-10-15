@@ -17,7 +17,7 @@ function create_coop_lobby() {
           
         let data = await response.json()        
         code_elmnt.innerHTML = data
-        form_submit.innerHTML = "Join"
+        form_submit.innerHTML = "Next >>"
         form_submit.removeEventListener("click", create_coop_lobby)
         form_submit.href = `/join?id=${data}`
     }

@@ -4,12 +4,20 @@ const gameboard = document.querySelector(".game-board")
 const player1_segs = document.getElementById("yourboard")
 const player2_segs = document.getElementById("opponentboard")
 
-let code = document.URL.slice(-6)
-if (code >= 100000) {
-    document.getElementById("game-code").value = code;
-}
+const game_code = document.getElementById("game-code")
 
-var id = document.getElementById("game-code").value
+let code = document.URL.slice(-6)
+    code = Number(code)
+    if (code >= 100000) {
+        game_code.value = code;
+        var game_login_code = code; 
+    }
+    else {
+        var game_login_code = Number(game_code.value);
+    }
+
+game_code.addEventListener("input", () => {game_login_code = Number(game_code.value);})
+
 const join_button = document.getElementById("join-coop")
 
 let d1 = document.getElementById("d1")
@@ -150,7 +158,7 @@ async function pushdata(args) {
     //do the things here     
 }
 
-join_button.addEventListener("click", () => {pushdata({id:code})})
+join_button.addEventListener("click", () => {pushdata({id:game_login_code});const socket = io();})
 
 
 //if get request, skip join splashpage
