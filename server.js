@@ -7,8 +7,8 @@ var app = express()
 /**
  * SOCKET.IO to manage current games, only use db for saved information lol.
  * socket id instead of ip addr
- * authoritative server functions
- * 
+ * authoritative server functions ( no cheating )
+ * client side reconciliation ( in case of extreme lag )
  * 
  * 
  * 
