@@ -14,10 +14,8 @@
             <h1>Join A Co-op Game</h1>
             <div class="img-container"><img src="../images/icon-512.jpg"></div>
             <div>
-                <input type="text" class="generated-code" id="code" maxlength="6">••••••</input>
-                <form action="/create" id="create_form">
-                <a id="create-coop" href="#" class="home-btn">Join</a>
-                </form>
+                <input type="text" id="game-code" class="generated-code" style="width: 100%; padding-left: 0; padding-right: 0;" id="code" maxlength="6" placeholder="••••••">
+                <a id="join-coop" class="home-btn">Join</a>
             </div>
         </div>
     </section>
@@ -114,5 +112,7 @@
         </section>
     </section>
     <script src="../online.js"></script>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script>const socket = io();</script>
 </body>
 </html>

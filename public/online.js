@@ -4,6 +4,14 @@ const gameboard = document.querySelector(".game-board")
 const player1_segs = document.getElementById("yourboard")
 const player2_segs = document.getElementById("opponentboard")
 
+let code = document.URL.slice(-6)
+if (code >= 100000) {
+    document.getElementById("game-code").value = code;
+}
+
+var id = document.getElementById("game-code").value
+const join_button = document.getElementById("join-coop")
+
 let d1 = document.getElementById("d1")
 let d2 = document.getElementById("d2")
 
@@ -141,5 +149,8 @@ async function pushdata(args) {
     let temp =  await response.json()   
     //do the things here     
 }
-//sending data to server
-pushdata(["something", "something"])
+
+join_button.addEventListener("click", () => {pushdata({id:code})})
+
+
+//if get request, skip join splashpage
