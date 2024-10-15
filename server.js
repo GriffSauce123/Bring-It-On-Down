@@ -11,7 +11,19 @@ const io = new Server(httpServer, { /* options */ });
 
 io.on("connection", socket => {
     console.log(`${socket.id} has connected`)
-})
+    socket.on("disconnect", () => {
+        console.log(`user disconnected`);
+    });
+    socket.on("join_game", (code) => {
+        console.log(code)
+    })
+});
+
+io.on('connection', (socket) => {
+  socket.on('chat message', (msg) => {
+    console.log('message: ' + msg);
+  });
+});
 
 /**
  * SOCKET.IO to manage current games, only use db for saved information lol.

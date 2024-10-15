@@ -158,7 +158,8 @@ async function pushdata(args) {
     //do the things here     
 }
 
-join_button.addEventListener("click", () => {pushdata({id:game_login_code});const socket = io();})
+const socket = io(); //initiating the connection to the server
+join_button.addEventListener("click", () => {socket.emit('join_game', game_login_code);}) //sending the game code to the server
 
 
 //if get request, skip join splashpage
