@@ -9,21 +9,46 @@ var app = express()
 const httpServer = createServer(app);
 const io = new Server(httpServer, { /* options */ });
 
+var games = {}
+var  template = new Array
+template.push("")
+
+//              code    p1 id                       p2 id            b1  b2  moves1  moves2 turns  won?  dice
+//{"123456":["VNRNzm3P2-eUxkvVAAAB","naYSiqocGPL2HNcoAAAB",[], [],   []  ,  []  ,  0   ,false,[0,0]],"123457":["naYSiqocGPL2HNcoAAAB","naYSiqocGPL2HNcoAAAB",[],[],[],[],0,false,[0,0]]}
+
 io.on("connection", socket => {
     console.log(`${socket.id} has connected`)
     socket.on("disconnect", () => {
         console.log(`user disconnected`);
     });
     socket.on("join_game", (code) => {
+        code = `${code}`
         console.log(code)
+        console.log(Object.keys(games).includes(code))
+        console.log(socket.id)
+        let temp = Array(games[code])
+        //console.log(temp)
+
+        if (Object.keys(games).includes(code)) {
+            console.log(template[0])
+            console.log("TEMP: " + temp )
+            if (!(temp[1] == "")) {
+                temp[1] = socket.id;
+                //send begin game signal
+            }
+            else {
+                //lobby is full
+            }
+            //console.log(games[String(code)])
+        }
+        else {
+            //create game
+            games[code] = [socket.id, "", [0,0,0,0,0,0,0,0,0,0], [0,0,0,0,0,0,0,0,0,0], [], [], 0, false, [0,0]]
+        }
+        console.log(games)
     })
 });
 
-io.on('connection', (socket) => {
-  socket.on('chat message', (msg) => {
-    console.log('message: ' + msg);
-  });
-});
 
 /**
  * SOCKET.IO to manage current games, only use db for saved information lol.
